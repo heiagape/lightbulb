@@ -25,14 +25,14 @@ function Branch() {
     count: { value: 8, min: 1, max: 20, step: 1, label: "Branch Count" },
     columns: { value: 1, min: 1, max: 10, step: 1, label: "Columns" },
     tiltAngle: {
-      value: 0.145,
+      value: 0.0,
       min: -1,
       max: 1,
       step: 0.01,
       label: "Base Tilt",
     },
     tiltFoldX: {
-      value: 0.3,
+      value: 0.0,
       min: 0,
       max: 4,
       step: 0.05,
@@ -44,6 +44,13 @@ function Branch() {
       max: 4,
       step: 0.05,
       label: "Tilt Fold Y",
+    },
+    overallFold: {
+      value: 0,
+      min: -2,
+      max: 2,
+      step: 0.05,
+      label: "Overall Fold",
     },
     tiltFoldZ: {
       value: 0,
@@ -175,6 +182,12 @@ function Branch() {
       const middleFactor = 1 - Math.abs(spreadFactor * 2);
       const columnAngleOffset = config.angleOffset * middleFactor;
 
+      // Top/bottom rows have base distanceInward of 0.3, middle has 0
+      // edgeFactor is 0 at center, 1 at edges
+      const edgeFactor = Math.abs(spreadFactor * 2);
+      const baseDistanceInward = edgeFactor * 0.3;
+      const totalDistanceInward = baseDistanceInward + config.distanceInward;
+
       // Position instances in a circle for this column
       for (let i = 0; i < config.count; i++) {
         const angle = (i / config.count) * Math.PI * 2 + columnAngleOffset;
@@ -202,23 +215,23 @@ function Branch() {
 
         // Position branches along the rotated inward direction
         dummy.position.set(
-          inwardDir.x * config.distanceInward,
-          inwardDir.y * config.distanceInward,
-          inwardDir.z * config.distanceInward
+          inwardDir.x * totalDistanceInward,
+          inwardDir.y * totalDistanceInward,
+          inwardDir.z * totalDistanceInward
         );
 
         // Apply rotations:
-        // - Base rotation: Y = circular angle + angle spread, Z = base tilt + fold Z
+        // - Base rotation: X = base tilt (perpendicular), Y = circular angle + angle spread, Z = fold Z
         // - Fold X: perpendicular fold on X axis (up/down in tangent direction)
         // - Fold Y: perpendicular fold on Y axis (up/down in another direction)
         dummy.rotation.set(
-          0,
+          config.tiltAngle,
           angle + angleSpread,
-          Math.PI / 2 + config.tiltAngle + foldZ
+          Math.PI / 2 + foldZ
         );
         dummy.updateMatrix();
 
-        // Apply fold X and fold Y as additional local rotations using quaternions
+        // Apply fold X, fold Y, and overall fold as additional local rotations using quaternions
         const baseQuaternion = new THREE.Quaternion().setFromEuler(
           dummy.rotation
         );
@@ -230,9 +243,17 @@ function Branch() {
           new THREE.Vector3(0, 1, 0),
           foldY
         );
+        // Overall fold applies uniformly to all columns (like foldY but constant)
+        const overallFoldQuaternion = new THREE.Quaternion().setFromAxisAngle(
+          new THREE.Vector3(0, 1, 0),
+          config.overallFold
+        );
 
-        // Combine: base * foldX * foldY
-        baseQuaternion.multiply(foldXQuaternion).multiply(foldYQuaternion);
+        // Combine: base * foldX * foldY * overallFold
+        baseQuaternion
+          .multiply(foldXQuaternion)
+          .multiply(foldYQuaternion)
+          .multiply(overallFoldQuaternion);
         dummy.quaternion.copy(baseQuaternion);
 
         dummy.scale.set(1, 1, 1);
