@@ -24,20 +24,6 @@ function Branch() {
   const config = useControls("Branch Chandelier", {
     count: { value: 8, min: 1, max: 20, step: 1, label: "Branch Count" },
     columns: { value: 1, min: 1, max: 10, step: 1, label: "Columns" },
-    tiltAngle: {
-      value: 0.0,
-      min: -1,
-      max: 1,
-      step: 0.01,
-      label: "Base Tilt",
-    },
-    tiltFoldX: {
-      value: 0.0,
-      min: 0,
-      max: 4,
-      step: 0.05,
-      label: "Tilt Fold X",
-    },
     tiltFoldY: {
       value: 0,
       min: 0,
@@ -47,24 +33,10 @@ function Branch() {
     },
     overallFold: {
       value: 0,
-      min: -2,
-      max: 2,
-      step: 0.05,
+      min: -0.2,
+      max: 0.2,
+      step: 0.01,
       label: "Overall Fold",
-    },
-    tiltFoldZ: {
-      value: 0,
-      min: 0,
-      max: 4,
-      step: 0.05,
-      label: "Tilt Fold Z",
-    },
-    angleSpread: {
-      value: 0,
-      min: 0,
-      max: 4,
-      step: 0.05,
-      label: "Angle Spread",
     },
     angleOffset: {
       value: 0,
@@ -82,6 +54,14 @@ function Branch() {
     },
     randomSeed: { value: 1, min: 1, max: 100, step: 1, label: "Random Seed" },
   });
+
+  // Hidden config values (not in GUI)
+  const hiddenConfig = {
+    tiltAngle: 0.0,
+    tiltFoldX: 0.0,
+    tiltFoldZ: 0.0,
+    angleSpread: 0.0,
+  };
 
   // Calculate total instances and random assignments
   const { totalInstances, instanceAssignments } = useMemo(() => {
@@ -172,10 +152,10 @@ function Branch() {
       const spreadFactor =
         config.columns === 1 ? 0 : col / (config.columns - 1) - 0.5;
 
-      const foldX = spreadFactor * config.tiltFoldX;
+      const foldX = spreadFactor * hiddenConfig.tiltFoldX;
       const foldY = spreadFactor * config.tiltFoldY;
-      const foldZ = spreadFactor * config.tiltFoldZ;
-      const angleSpread = spreadFactor * config.angleSpread;
+      const foldZ = spreadFactor * hiddenConfig.tiltFoldZ;
+      const angleSpread = spreadFactor * hiddenConfig.angleSpread;
 
       // Middle columns get full angleOffset, top/bottom columns get less
       // middleFactor is 1 at center (spreadFactor=0), 0 at edges (spreadFactor=±0.5)
@@ -225,7 +205,7 @@ function Branch() {
         // - Fold X: perpendicular fold on X axis (up/down in tangent direction)
         // - Fold Y: perpendicular fold on Y axis (up/down in another direction)
         dummy.rotation.set(
-          config.tiltAngle,
+          hiddenConfig.tiltAngle,
           angle + angleSpread,
           Math.PI / 2 + foldZ
         );
