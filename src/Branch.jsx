@@ -6,15 +6,16 @@ import * as THREE from "three";
 
 // Branch component - creates instanced meshes from multiple branch models
 function Branch() {
-  // Load all 7 branch models
+  // Load all 8 branch models
   const branchGLTFs = useLoader(GLTFLoader, [
-    "/src/assets/branch.01.glb",
-    "/src/assets/branch.02.glb",
-    "/src/assets/branch.03.glb",
-    "/src/assets/branch.04.glb",
-    "/src/assets/branch.05.glb",
-    "/src/assets/branch.06.glb",
-    "/src/assets/branch.07.glb",
+    "/src/assets/branch.011.glb",
+    "/src/assets/branch.021.glb",
+    "/src/assets/branch.031.glb",
+    "/src/assets/branch.041.glb",
+    "/src/assets/branch.051.glb",
+    "/src/assets/branch.061.glb",
+    "/src/assets/branch.071.glb",
+    "/src/assets/branch.081.glb",
   ]);
 
   const instancedMeshRefs = useRef({});
@@ -30,12 +31,33 @@ function Branch() {
       step: 0.01,
       label: "Base Tilt",
     },
-    tiltSpread: {
+    tiltFoldX: {
       value: 0.3,
       min: 0,
       max: 4,
       step: 0.05,
-      label: "Tilt Spread",
+      label: "Tilt Fold X",
+    },
+    tiltFoldY: {
+      value: 0,
+      min: 0,
+      max: 4,
+      step: 0.05,
+      label: "Tilt Fold Y",
+    },
+    tiltFoldZ: {
+      value: 0,
+      min: 0,
+      max: 4,
+      step: 0.05,
+      label: "Tilt Fold Z",
+    },
+    angleSpread: {
+      value: 0,
+      min: 0,
+      max: 4,
+      step: 0.05,
+      label: "Angle Spread",
     },
     angleOffset: {
       value: 0,
@@ -43,6 +65,13 @@ function Branch() {
       max: Math.PI,
       step: 0.1,
       label: "Rotation Offset",
+    },
+    distanceInward: {
+      value: 0,
+      min: -5,
+      max: 5,
+      step: 0.01,
+      label: "Distance Inward",
     },
     randomSeed: { value: 1, min: 1, max: 100, step: 1, label: "Random Seed" },
   });
@@ -60,7 +89,7 @@ function Branch() {
 
     // Randomly assign each instance to a branch model
     for (let i = 0; i < total; i++) {
-      const branchIndex = Math.floor(random(config.randomSeed + i) * 7);
+      const branchIndex = Math.floor(random(config.randomSeed + i) * 8);
       assignments.push(branchIndex);
     }
 
@@ -84,11 +113,25 @@ function Branch() {
             name: child.name,
           });
 
+          // Enhanced logging to debug material issues
+          const materialInfo = {
+            type: material?.type || "unknown",
+            name: material?.name || "unnamed",
+            color: material?.color
+              ? `#${material.color.getHexString()}`
+              : "no color",
+            needsLight:
+              material?.type?.includes("Standard") ||
+              material?.type?.includes("Phong") ||
+              material?.type?.includes("Lambert"),
+            emissive: material?.emissive
+              ? `#${material.emissive.getHexString()}`
+              : "none",
+          };
+
           console.log(
-            `Branch ${branchIndex + 1}: Found mesh "${
-              child.name
-            }" with material:`,
-            material?.name || material?.type || "unknown"
+            `Branch ${branchIndex + 1}: Mesh "${child.name}"`,
+            materialInfo
           );
         }
       });
@@ -99,7 +142,7 @@ function Branch() {
 
   // Count instances per branch type
   const instanceCounts = useMemo(() => {
-    const counts = [0, 0, 0, 0, 0, 0, 0];
+    const counts = [0, 0, 0, 0, 0, 0, 0, 0];
     instanceAssignments.forEach((branchIndex) => {
       counts[branchIndex]++;
     });
@@ -112,28 +155,85 @@ function Branch() {
     const dummy = new THREE.Object3D();
 
     // Track which instance of each branch type we're setting
-    const branchInstanceIndices = [0, 0, 0, 0, 0, 0, 0];
+    const branchInstanceIndices = [0, 0, 0, 0, 0, 0, 0, 0];
 
     let globalInstanceIndex = 0;
 
     // Create transformations for all instances
     for (let col = 0; col < config.columns; col++) {
-      // Calculate tilt for this column
-      const tiltOffset =
-        config.columns === 1
-          ? 0
-          : (col / (config.columns - 1) - 0.5) * config.tiltSpread;
-      const columnTilt = config.tiltAngle + tiltOffset;
+      // Calculate fold spread for this column
+      const spreadFactor =
+        config.columns === 1 ? 0 : col / (config.columns - 1) - 0.5;
+
+      const foldX = spreadFactor * config.tiltFoldX;
+      const foldY = spreadFactor * config.tiltFoldY;
+      const foldZ = spreadFactor * config.tiltFoldZ;
+      const angleSpread = spreadFactor * config.angleSpread;
+
+      // Middle columns get full angleOffset, top/bottom columns get less
+      // middleFactor is 1 at center (spreadFactor=0), 0 at edges (spreadFactor=±0.5)
+      const middleFactor = 1 - Math.abs(spreadFactor * 2);
+      const columnAngleOffset = config.angleOffset * middleFactor;
 
       // Position instances in a circle for this column
       for (let i = 0; i < config.count; i++) {
-        const angle = (i / config.count) * Math.PI * 2 + config.angleOffset;
+        const angle = (i / config.count) * Math.PI * 2 + columnAngleOffset;
 
-        // Keep all branches at origin (pivot point at 0,0,0)
-        dummy.position.set(0, 0, 0);
+        // Calculate inward direction (perpendicular to radial)
+        const inwardDir = new THREE.Vector3(
+          Math.sin(angle),
+          0,
+          Math.cos(angle)
+        );
 
-        // Rotate around Y axis to spread in circle, with column-specific tilt
-        dummy.rotation.set(0, angle, Math.PI / 2 + columnTilt);
+        // Rotate the inward direction by foldY so folded columns still point toward [0,0,0]
+        // The rotation axis needs to be perpendicular to inward direction (tangent to circle)
+        // This ensures each branch tilts correctly toward center
+        const rotationAxis = new THREE.Vector3(
+          -Math.cos(angle),
+          0,
+          Math.sin(angle)
+        );
+        const foldYRotation = new THREE.Quaternion().setFromAxisAngle(
+          rotationAxis,
+          foldY
+        );
+        inwardDir.applyQuaternion(foldYRotation);
+
+        // Position branches along the rotated inward direction
+        dummy.position.set(
+          inwardDir.x * config.distanceInward,
+          inwardDir.y * config.distanceInward,
+          inwardDir.z * config.distanceInward
+        );
+
+        // Apply rotations:
+        // - Base rotation: Y = circular angle + angle spread, Z = base tilt + fold Z
+        // - Fold X: perpendicular fold on X axis (up/down in tangent direction)
+        // - Fold Y: perpendicular fold on Y axis (up/down in another direction)
+        dummy.rotation.set(
+          0,
+          angle + angleSpread,
+          Math.PI / 2 + config.tiltAngle + foldZ
+        );
+        dummy.updateMatrix();
+
+        // Apply fold X and fold Y as additional local rotations using quaternions
+        const baseQuaternion = new THREE.Quaternion().setFromEuler(
+          dummy.rotation
+        );
+        const foldXQuaternion = new THREE.Quaternion().setFromAxisAngle(
+          new THREE.Vector3(1, 0, 0),
+          foldX
+        );
+        const foldYQuaternion = new THREE.Quaternion().setFromAxisAngle(
+          new THREE.Vector3(0, 1, 0),
+          foldY
+        );
+
+        // Combine: base * foldX * foldY
+        baseQuaternion.multiply(foldXQuaternion).multiply(foldYQuaternion);
+        dummy.quaternion.copy(baseQuaternion);
 
         dummy.scale.set(1, 1, 1);
         dummy.updateMatrix();

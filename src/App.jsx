@@ -1,25 +1,18 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Suspense } from "react";
-import { useLoader } from "@react-three/fiber";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import Branch from "./Branch";
+import { Stem } from "./stem";
 import "./style.css";
-
-// Stem component - loads the central stem model
-function Stem() {
-  const gltf = useLoader(GLTFLoader, "/src/assets/Stem.glb");
-
-  return <primitive object={gltf.scene} />;
-}
 
 // Scene component containing all 3D elements
 function Scene() {
   return (
     <>
       {/* Lights */}
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[5, 5, 5]} intensity={1} />
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[5, 5, 5]} intensity={1.2} />
+      <directionalLight position={[-5, 5, -5]} intensity={0.8} />
 
       {/* Plane at origin */}
       {/* <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
