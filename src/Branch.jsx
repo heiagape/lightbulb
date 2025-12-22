@@ -3,6 +3,7 @@ import { useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { useControls } from "leva";
 import * as THREE from "three";
+import { MiracleGlass } from "./GlassMaterials";
 
 // Branch component - creates instanced meshes from multiple branch models
 function Branch() {
@@ -244,6 +245,7 @@ function Branch() {
         const meshIndex = branchInstanceIndices[branchIndex];
 
         // Set the matrix for the appropriate branch type's instanced mesh
+        // This includes both layer 1 and layer 2 (duplicate glass meshes)
         const meshKey = `branch-${branchIndex}`;
         Object.keys(instancedMeshRefs.current).forEach((key) => {
           if (key.startsWith(meshKey)) {
@@ -275,17 +277,67 @@ function Branch() {
         const count = instanceCounts[branchIndex];
         if (count === 0) return null; // Skip if no instances for this branch
 
-        return meshes.map((meshData, meshIndex) => (
-          <instancedMesh
-            key={`branch-${branchIndex}-mesh-${meshIndex}-${totalInstances}-${config.randomSeed}`}
-            ref={(ref) => {
-              instancedMeshRefs.current[
-                `branch-${branchIndex}-mesh-${meshIndex}`
-              ] = ref;
-            }}
-            args={[meshData.geometry, meshData.material, count]}
-          />
-        ));
+        return meshes.map((meshData, meshIndex) => {
+          // Check if the mesh name includes "glass" or matches specific mesh names
+          const isGlassMesh = meshData.name.toLowerCase().includes("glass") || 
+                              meshData.name === "MET-59_3D-Model17661";
+          
+          return (
+            <>
+              {/* First layer - original glass mesh */}
+              <instancedMesh
+                key={`branch-${branchIndex}-mesh-${meshIndex}-layer1-${totalInstances}-${config.randomSeed}`}
+                ref={(ref) => {
+                  instancedMeshRefs.current[
+                    `branch-${branchIndex}-mesh-${meshIndex}`
+                  ] = ref;
+                }}
+                args={[
+                  meshData.geometry,
+                  isGlassMesh ? null : meshData.material,
+                  count
+                ]}
+              >
+                {isGlassMesh && <MiracleGlass
+                  ior={1.5}
+                  absorptionColor={"#ffffff"}
+                  isBackFace={false}
+                  thickness={0.01}
+                  envIntensity={1.5}
+                  edgeReflectionIntensity={0.5} 
+                  edgeReflectionPower={0.9}     
+                  edgeReflectionWidth={0.1}
+                  shellLayer={2}
+                />}
+              </instancedMesh>
+              
+              {/* Second layer - duplicate glass mesh with different material */}
+              {isGlassMesh && (
+                <instancedMesh
+                  key={`branch-${branchIndex}-mesh-${meshIndex}-layer2-${totalInstances}-${config.randomSeed}`}
+                  ref={(ref) => {
+                    instancedMeshRefs.current[
+                      `branch-${branchIndex}-mesh-${meshIndex}-layer2`
+                    ] = ref;
+                  }}
+                  args={[meshData.geometry, null, count]}
+                >
+                  <MiracleGlass
+                    ior={1.5}
+                    absorptionColor={"#ffffff"}
+                    isBackFace={true}
+                    thickness={0.01}
+                    envIntensity={1.2}
+                    edgeReflectionIntensity={0.5} 
+                    edgeReflectionPower={0.9}     
+                    edgeReflectionWidth={0.1}
+                    shellLayer={3}
+                  />
+                </instancedMesh>
+              )}
+            </>
+          );
+        });
       })}
     </>
   );
