@@ -3,7 +3,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 // Hook to load the Stem.glb model
 export function useStem() {
-  const gltf = useLoader(GLTFLoader, "/src/assets/Stem.glb");
+  const gltf = useLoader(GLTFLoader, "/assets/Stem.glb");
   return gltf;
 }
 

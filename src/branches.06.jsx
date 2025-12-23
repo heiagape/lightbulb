@@ -4,7 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 // Hook to load and extract mesh data from branch.061.glb
 export function useBranch06() {
-  const gltf = useLoader(GLTFLoader, "/src/assets/branch.061.glb");
+  const gltf = useLoader(GLTFLoader, "/assets/branch.061.glb");
 
   const meshes = useMemo(() => {
     const meshData = [];

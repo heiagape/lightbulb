@@ -9,14 +9,14 @@ import { MiracleGlass } from "./GlassMaterials";
 function Branch() {
   // Load all 8 branch models
   const branchGLTFs = useLoader(GLTFLoader, [
-    "/src/assets/branch.011.glb",
-    "/src/assets/branch.021.glb",
-    "/src/assets/branch.031.glb",
-    "/src/assets/branch.041.glb",
-    "/src/assets/branch.051.glb",
-    "/src/assets/branch.061.glb",
-    "/src/assets/branch.071.glb",
-    "/src/assets/branch.081.glb",
+    "/assets/branch.011.glb",
+    "/assets/branch.021.glb",
+    "/assets/branch.031.glb",
+    "/assets/branch.041.glb",
+    "/assets/branch.051.glb",
+    "/assets/branch.061.glb",
+    "/assets/branch.071.glb",
+    "/assets/branch.081.glb",
   ]);
 
   const instancedMeshRefs = useRef({});

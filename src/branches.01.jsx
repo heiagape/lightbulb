@@ -5,7 +5,7 @@ import * as THREE from "three";
 
 // Hook to load and extract mesh data from branch.011.glb
 export function useBranch01() {
-  const gltf = useLoader(GLTFLoader, "/src/assets/branch.011.glb");
+  const gltf = useLoader(GLTFLoader, "/assets/branch.011.glb");
 
   const meshes = useMemo(() => {
     // Define group transformations - edit these values to transform all meshes as a group
