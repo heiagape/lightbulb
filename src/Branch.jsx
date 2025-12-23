@@ -279,9 +279,10 @@ function Branch() {
 
         return meshes.map((meshData, meshIndex) => {
           // Check if the mesh name includes "glass" or matches specific mesh names
-          const isGlassMesh = meshData.name.toLowerCase().includes("glass") || 
-                              meshData.name === "MET-59_3D-Model17661";
-          
+          const isGlassMesh =
+            meshData.name.toLowerCase().includes("glass") ||
+            meshData.name === "MET-59_3D-Model17661";
+
           return (
             <>
               {/* First layer - original glass mesh */}
@@ -295,22 +296,24 @@ function Branch() {
                 args={[
                   meshData.geometry,
                   isGlassMesh ? null : meshData.material,
-                  count
+                  count,
                 ]}
               >
-                {isGlassMesh && <MiracleGlass
-                  ior={1.5}
-                  absorptionColor={"#ffffff"}
-                  isBackFace={false}
-                  thickness={0.01}
-                  envIntensity={1.5}
-                  edgeReflectionIntensity={0.5} 
-                  edgeReflectionPower={0.9}     
-                  edgeReflectionWidth={0.1}
-                  shellLayer={2}
-                />}
+                {isGlassMesh && (
+                  <MiracleGlass
+                    ior={1.5}
+                    absorptionColor={"#ffffff"}
+                    isBackFace={false}
+                    thickness={0.01}
+                    envIntensity={1.5}
+                    edgeReflectionIntensity={0.5}
+                    edgeReflectionPower={0.9}
+                    edgeReflectionWidth={0.1}
+                    shellLayer={2}
+                  />
+                )}
               </instancedMesh>
-              
+
               {/* Second layer - duplicate glass mesh with different material */}
               {isGlassMesh && (
                 <instancedMesh
@@ -328,8 +331,8 @@ function Branch() {
                     isBackFace={true}
                     thickness={0.01}
                     envIntensity={1.2}
-                    edgeReflectionIntensity={0.5} 
-                    edgeReflectionPower={0.9}     
+                    edgeReflectionIntensity={0.5}
+                    edgeReflectionPower={0.9}
                     edgeReflectionWidth={0.1}
                     shellLayer={3}
                   />

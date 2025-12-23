@@ -3,6 +3,7 @@ import { OrbitControls } from "@react-three/drei";
 import { Suspense } from "react";
 import Branch from "./Branch";
 import { Stem } from "./stem";
+import EnvironmentBackground from "./EnvironmentBackground";
 import "./style.css";
 
 // Scene component containing all 3D elements
@@ -19,6 +20,11 @@ function Scene() {
         <planeGeometry args={[10, 10]} />
         <meshStandardMaterial color="#333333" />
       </mesh> */}
+
+      {/* Environment Background */}
+      <Suspense fallback={null}>
+        <EnvironmentBackground />
+      </Suspense>
 
       {/* Models */}
       <Suspense fallback={null}>
@@ -45,7 +51,6 @@ function App() {
         camera={{ position: [0, 2, 5], fov: 75 }}
         gl={{ antialias: true }}
       >
-        <color attach="background" args={["#1a1a1a"]} />
         <Scene />
       </Canvas>
     </div>
