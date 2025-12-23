@@ -190,7 +190,7 @@ export const MiracleGlass = ({ ref: materialRef, ...props }) => {
   // const envMap = useEnvironmentMap('/hdris/dresden_station_night_2k.hdr');
   //  const envMap = useEnvironmentMap('/hdris/metro_noord_2k.hdr');
   //const envMap = useEnvironmentMap('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/brown_photostudio_06_2k.hdr');
-  const envMap = useEnvironmentMap("/public/colorful_studio_4k.hdr");
+  const envMap = useEnvironmentMap("/colorful_studio_4k.hdr");
 
   return (
     <CustomGlassMaterial
