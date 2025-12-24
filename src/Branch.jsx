@@ -23,24 +23,24 @@ function Branch() {
 
   // GUI controls for instancing configuration
   const config = useControls("Branch Chandelier", {
-    count: { value: 8, min: 1, max: 20, step: 1, label: "Branch Count" },
-    columns: { value: 1, min: 1, max: 10, step: 1, label: "Columns" },
+    count: { value: 14, min: 1, max: 20, step: 1, label: "Branch Count" },
+    columns: { value: 7, min: 1, max: 10, step: 1, label: "Columns" },
     tiltFoldY: {
-      value: 0,
+      value: 1.75,
       min: 0,
       max: 4,
       step: 0.05,
       label: "Tilt Fold Y",
     },
     overallFold: {
-      value: 0,
+      value: 0.14,
       min: -0.2,
       max: 0.2,
       step: 0.01,
       label: "Overall Fold",
     },
     angleOffset: {
-      value: 0,
+      value: 0.7,
       min: -Math.PI,
       max: Math.PI,
       step: 0.1,
@@ -53,7 +53,7 @@ function Branch() {
       step: 0.01,
       label: "Distance Inward",
     },
-    randomSeed: { value: 1, min: 1, max: 100, step: 1, label: "Random Seed" },
+    randomSeed: { value: 51, min: 1, max: 100, step: 1, label: "Random Seed" },
   });
 
   // Hidden config values (not in GUI)
