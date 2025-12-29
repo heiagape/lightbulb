@@ -47,13 +47,13 @@ function Branch() {
       label: "Rotation Offset",
     },
     distanceInward: {
-      value: -0.05,
+      value: -0.07,
       min: -0.2,
       max: 0.2,
       step: 0.001,
       label: "Distance Inward",
     },
-    randomSeed: { value: 51, min: 1, max: 100, step: 1, label: "Random Seed" },
+    randomSeed: { value: 80, min: 1, max: 100, step: 1, label: "Random Seed" },
   });
 
   // Hidden config values (not in GUI)
