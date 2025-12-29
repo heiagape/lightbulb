@@ -75,8 +75,10 @@ function Branch() {
       return x - Math.floor(x);
     };
 
-    // Determine center column and excluded columns (second top and second bottom)
+    // Determine center column and column positions
     const centerColumn = Math.floor(config.columns / 2);
+    const topColumn = 0; // Top column (0-indexed)
+    const bottomColumn = config.columns - 1; // Bottom column
     const secondTopColumn = 1; // Second column from top (0-indexed)
     const secondBottomColumn = config.columns - 2; // Second column from bottom
 
@@ -117,24 +119,32 @@ function Branch() {
 
     // Step 1: First assign all long branches with proper spacing
     for (let col = 0; col < config.columns; col++) {
+      const isTopOrBottom = col === topColumn || col === bottomColumn;
       const isCenterColumn = col === centerColumn;
-      const isExcludedColumn =
-        col === secondTopColumn || col === secondBottomColumn;
-
-      if (isExcludedColumn) continue; // Skip excluded columns for long branches
+      const isSecondTopToCenter = col > secondTopColumn && col < centerColumn;
+      const isCenterToSecondBottom =
+        col > centerColumn && col < secondBottomColumn;
 
       // Determine interval pattern for this column
       let longBranchCounter = 0;
       let nextLongBranchAt = 0;
 
-      if (isCenterColumn) {
-        // Center: every 3-5 branches
+      if (isTopOrBottom) {
+        // Top and bottom columns: every 3-4 branches
         nextLongBranchAt =
-          Math.floor(random(config.randomSeed + col * 100) * 3) + 1;
+          Math.floor(random(config.randomSeed + col * 100) * 2) + 3;
+      } else if (isCenterColumn) {
+        // Center column: every 1-2 branches (most frequent)
+        nextLongBranchAt =
+          Math.floor(random(config.randomSeed + col * 100) * 2) + 1;
+      } else if (isSecondTopToCenter || isCenterToSecondBottom) {
+        // From second top to center (excluding center): every 2-3 branches
+        nextLongBranchAt =
+          Math.floor(random(config.randomSeed + col * 100) * 2) + 2;
       } else {
-        // Other columns: every 4-5 branches
+        // Second top and second bottom columns: every 2-3 branches
         nextLongBranchAt =
-          Math.floor(random(config.randomSeed + col * 100) * 2) + 4;
+          Math.floor(random(config.randomSeed + col * 100) * 2) + 2;
       }
 
       for (let i = 0; i < config.count; i++) {
@@ -154,12 +164,18 @@ function Branch() {
             ];
           // Reset counter and set next interval
           longBranchCounter = 0;
-          if (isCenterColumn) {
+          if (isTopOrBottom) {
+            // Top and bottom: every 3-4 branches
             nextLongBranchAt =
-              Math.floor(random(config.randomSeed + globalIndex) * 3) + 3;
+              Math.floor(random(config.randomSeed + globalIndex) * 2) + 3;
+          } else if (isCenterColumn) {
+            // Center: every 1-2 branches
+            nextLongBranchAt =
+              Math.floor(random(config.randomSeed + globalIndex) * 2) + 1;
           } else {
+            // Second top to center (excluding center): every 2-3 branches
             nextLongBranchAt =
-              Math.floor(random(config.randomSeed + globalIndex) * 2) + 4;
+              Math.floor(random(config.randomSeed + globalIndex) * 2) + 2;
           }
         }
 
@@ -203,20 +219,6 @@ function Branch() {
     // Assign short branches, prioritizing positions that are far from existing ones
     for (const globalIndex of unassignedPositions) {
       const pos = getPosition(globalIndex);
-      const isExcludedColumn =
-        pos.col === secondTopColumn || pos.col === secondBottomColumn;
-
-      // For excluded columns, just assign randomly from regular branches
-      if (isExcludedColumn) {
-        assignments[globalIndex] =
-          regularBranchIndices[
-            Math.floor(
-              random(config.randomSeed + globalIndex) *
-                regularBranchIndices.length
-            )
-          ];
-        continue;
-      }
 
       // Check distance to nearest short branch
       const minDistance = 2.5; // Minimum preferred distance between short branches
