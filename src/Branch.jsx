@@ -33,7 +33,7 @@ function Branch() {
       label: "Tilt Fold Y",
     },
     overallFold: {
-      value: 0.14,
+      value: 0.0,
       min: -0.2,
       max: 0.2,
       step: 0.01,
@@ -46,12 +46,12 @@ function Branch() {
       step: 0.1,
       label: "Rotation Offset",
     },
-    distanceInward: {
-      value: -0.07,
-      min: -0.2,
+    distanceOut: {
+      value: 0.07,
+      min: -0.05,
       max: 0.2,
       step: 0.001,
-      label: "Distance Inward",
+      label: "Distance Out",
     },
     randomSeed: { value: 80, min: 1, max: 100, step: 1, label: "Random Seed" },
   });
@@ -341,8 +341,7 @@ function Branch() {
       // edgeFactor is 0 at center, 1 at edges
       const edgeFactor = Math.abs(spreadFactor * 2);
       const baseDistanceInward = edgeFactor * 0.3;
-      const baseTotalDistanceInward =
-        baseDistanceInward + config.distanceInward;
+      const baseTotalDistanceInward = baseDistanceInward - config.distanceOut;
 
       // Position instances in a circle for this column
       for (let i = 0; i < config.count; i++) {
