@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Branch from "./Branch";
 import { Stem } from "./stem";
 import EnvironmentBackground from "./EnvironmentBackground";
+import { ReflectivePlatform } from "./ReflectivePlatform";
 import "./style.css";
 
 // Scene component containing all 3D elements
@@ -34,6 +35,9 @@ function Scene() {
         <Stem />
         <Branch />
       </Suspense>
+
+      {/* Reflective Platform */}
+      <ReflectivePlatform size={80} position={[0, -0.7, 0]} receiveShadow />
 
       {/* Camera Controls */}
       <OrbitControls

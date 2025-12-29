@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from "react";
-import { useLoader } from "@react-three/fiber";
+import { useLoader, useFrame } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { useControls } from "leva";
 import * as THREE from "three";
@@ -20,6 +20,7 @@ function Branch() {
   ]);
 
   const instancedMeshRefs = useRef({});
+  const groupRef = useRef();
 
   // GUI controls for instancing configuration
   const config = useControls("Branch Chandelier", {
@@ -54,6 +55,7 @@ function Branch() {
       label: "Distance Out",
     },
     randomSeed: { value: 80, min: 1, max: 100, step: 1, label: "Random Seed" },
+    autoRotate: { value: true, label: "Auto Rotate" },
   });
 
   // Hidden config values (not in GUI)
@@ -453,10 +455,17 @@ function Branch() {
     });
   }, [branchMeshData, config, instanceAssignments]);
 
+  // Auto-rotation animation
+  useFrame((state, delta) => {
+    if (config.autoRotate && groupRef.current) {
+      groupRef.current.rotation.y += delta * 0.2; // Slow rotation (0.2 radians per second)
+    }
+  });
+
   if (branchMeshData.length === 0) return null;
 
   return (
-    <>
+    <group ref={groupRef}>
       {branchMeshData.map((meshes, branchIndex) => {
         const count = instanceCounts[branchIndex];
         if (count === 0) return null; // Skip if no instances for this branch
@@ -526,7 +535,7 @@ function Branch() {
           );
         });
       })}
-    </>
+    </group>
   );
 }
 
