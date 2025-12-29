@@ -40,7 +40,7 @@ function Branch() {
       label: "Overall Fold",
     },
     angleOffset: {
-      value: 0.9,
+      value: 1.6,
       min: -Math.PI,
       max: Math.PI,
       step: 0.1,
@@ -121,6 +121,7 @@ function Branch() {
     for (let col = 0; col < config.columns; col++) {
       const isTopOrBottom = col === topColumn || col === bottomColumn;
       const isCenterColumn = col === centerColumn;
+      const isColumnAboveCenter = col === centerColumn - 1;
       const isSecondTopToCenter = col > secondTopColumn && col < centerColumn;
       const isCenterToSecondBottom =
         col > centerColumn && col < secondBottomColumn;
@@ -133,8 +134,8 @@ function Branch() {
         // Top and bottom columns: every 3-4 branches
         nextLongBranchAt =
           Math.floor(random(config.randomSeed + col * 100) * 2) + 3;
-      } else if (isCenterColumn) {
-        // Center column: every 1-2 branches (most frequent)
+      } else if (isCenterColumn || isColumnAboveCenter) {
+        // Center column and column above center: every 1-2 branches (most frequent)
         nextLongBranchAt =
           Math.floor(random(config.randomSeed + col * 100) * 2) + 1;
       } else if (isSecondTopToCenter || isCenterToSecondBottom) {
@@ -168,8 +169,8 @@ function Branch() {
             // Top and bottom: every 3-4 branches
             nextLongBranchAt =
               Math.floor(random(config.randomSeed + globalIndex) * 2) + 3;
-          } else if (isCenterColumn) {
-            // Center: every 1-2 branches
+          } else if (isCenterColumn || isColumnAboveCenter) {
+            // Center and column above center: every 1-2 branches
             nextLongBranchAt =
               Math.floor(random(config.randomSeed + globalIndex) * 2) + 1;
           } else {
