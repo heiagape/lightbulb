@@ -10,6 +10,9 @@ import "./style.css";
 function Scene() {
   return (
     <>
+      {/* Black Background */}
+      <color attach="background" args={["#000000"]} />
+
       {/* Lights */}
       <ambientLight intensity={0.8} />
       <directionalLight position={[5, 5, 5]} intensity={1.2} />
@@ -22,9 +25,9 @@ function Scene() {
       </mesh> */}
 
       {/* Environment Background */}
-      <Suspense fallback={null}>
+      {/* <Suspense fallback={null}>
         <EnvironmentBackground />
-      </Suspense>
+      </Suspense> */}
 
       {/* Models */}
       <Suspense fallback={null}>

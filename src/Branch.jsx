@@ -23,8 +23,8 @@ function Branch() {
 
   // GUI controls for instancing configuration
   const config = useControls("Branch Chandelier", {
-    count: { value: 14, min: 1, max: 20, step: 1, label: "Branch Count" },
-    columns: { value: 7, min: 1, max: 10, step: 1, label: "Columns" },
+    count: { value: 15, min: 13, max: 20, step: 1, label: "Branch Count" },
+    columns: { value: 7, min: 6, max: 10, step: 1, label: "Columns" },
     tiltFoldY: {
       value: 1.75,
       min: 0,
@@ -40,17 +40,17 @@ function Branch() {
       label: "Overall Fold",
     },
     angleOffset: {
-      value: 0.7,
+      value: 0.9,
       min: -Math.PI,
       max: Math.PI,
       step: 0.1,
       label: "Rotation Offset",
     },
     distanceInward: {
-      value: 0,
-      min: -5,
-      max: 5,
-      step: 0.01,
+      value: -0.05,
+      min: -0.2,
+      max: 0.2,
+      step: 0.001,
       label: "Distance Inward",
     },
     randomSeed: { value: 51, min: 1, max: 100, step: 1, label: "Random Seed" },
@@ -67,7 +67,7 @@ function Branch() {
   // Calculate total instances and random assignments
   const { totalInstances, instanceAssignments } = useMemo(() => {
     const total = config.count * config.columns;
-    const assignments = [];
+    const assignments = new Array(total).fill(-1); // Initialize with -1 (unassigned)
 
     // Use seed for reproducible randomness
     const random = (seed) => {
@@ -75,10 +75,175 @@ function Branch() {
       return x - Math.floor(x);
     };
 
-    // Randomly assign each instance to a branch model
+    // Determine center column and excluded columns (second top and second bottom)
+    const centerColumn = Math.floor(config.columns / 2);
+    const secondTopColumn = 1; // Second column from top (0-indexed)
+    const secondBottomColumn = config.columns - 2; // Second column from bottom
+
+    // Long branches are branch07 (index 6) and branch08 (index 7)
+    const longBranchIndices = [6, 7];
+    // Regular branches are indices 0-5
+    const regularBranchIndices = [0, 1, 2, 3, 4, 5];
+
+    // Helper function to get position from global index
+    const getPosition = (globalIndex) => {
+      const col = Math.floor(globalIndex / config.count);
+      const row = globalIndex % config.count;
+      return { col, row };
+    };
+
+    // Helper function to calculate distance between two positions
+    const getDistance = (pos1, pos2) => {
+      const colDiff = Math.abs(pos1.col - pos2.col);
+      const rowDiff = Math.abs(pos1.row - pos2.row);
+      // Use Manhattan distance, but weight column distance more to prevent horizontal clustering
+      return colDiff * 1.5 + rowDiff;
+    };
+
+    // Helper function to check if position has nearby short branches
+    const hasNearbyShortBranches = (pos, minDistance = 2) => {
+      for (let i = 0; i < assignments.length; i++) {
+        if (assignments[i] === -1) continue; // Skip unassigned
+        if (assignments[i] >= 6) continue; // Skip long branches
+
+        const otherPos = getPosition(i);
+        const distance = getDistance(pos, otherPos);
+        if (distance < minDistance) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // Step 1: First assign all long branches with proper spacing
+    for (let col = 0; col < config.columns; col++) {
+      const isCenterColumn = col === centerColumn;
+      const isExcludedColumn =
+        col === secondTopColumn || col === secondBottomColumn;
+
+      if (isExcludedColumn) continue; // Skip excluded columns for long branches
+
+      // Determine interval pattern for this column
+      let longBranchCounter = 0;
+      let nextLongBranchAt = 0;
+
+      if (isCenterColumn) {
+        // Center: every 3-5 branches
+        nextLongBranchAt =
+          Math.floor(random(config.randomSeed + col * 100) * 3) + 1;
+      } else {
+        // Other columns: every 4-5 branches
+        nextLongBranchAt =
+          Math.floor(random(config.randomSeed + col * 100) * 2) + 4;
+      }
+
+      for (let i = 0; i < config.count; i++) {
+        const globalIndex = col * config.count + i;
+
+        // Check if this should be a long branch
+        const shouldBeLong = longBranchCounter >= nextLongBranchAt;
+
+        if (shouldBeLong) {
+          // Assign long branch (branch07 or branch08)
+          assignments[globalIndex] =
+            longBranchIndices[
+              Math.floor(
+                random(config.randomSeed + globalIndex) *
+                  longBranchIndices.length
+              )
+            ];
+          // Reset counter and set next interval
+          longBranchCounter = 0;
+          if (isCenterColumn) {
+            nextLongBranchAt =
+              Math.floor(random(config.randomSeed + globalIndex) * 3) + 3;
+          } else {
+            nextLongBranchAt =
+              Math.floor(random(config.randomSeed + globalIndex) * 2) + 4;
+          }
+        }
+
+        longBranchCounter++;
+      }
+    }
+
+    // Step 2: Fill remaining positions with short branches, ensuring spatial distribution
+    // Create a list of all unassigned positions
+    const unassignedPositions = [];
     for (let i = 0; i < total; i++) {
-      const branchIndex = Math.floor(random(config.randomSeed + i) * 8);
-      assignments.push(branchIndex);
+      if (assignments[i] === -1) {
+        unassignedPositions.push(i);
+      }
+    }
+
+    // Sort unassigned positions by a score that prioritizes positions
+    // that are far from existing short branches
+    const scorePosition = (globalIndex) => {
+      const pos = getPosition(globalIndex);
+      let score = 0;
+
+      // Check all assigned short branches and calculate distance
+      for (let i = 0; i < assignments.length; i++) {
+        if (assignments[i] === -1 || assignments[i] >= 6) continue;
+
+        const otherPos = getPosition(i);
+        const distance = getDistance(pos, otherPos);
+        // Higher score for positions further from existing short branches
+        score += distance;
+      }
+
+      return score;
+    };
+
+    // Sort by score (highest first - positions far from short branches)
+    unassignedPositions.sort((a, b) => {
+      return scorePosition(b) - scorePosition(a);
+    });
+
+    // Assign short branches, prioritizing positions that are far from existing ones
+    for (const globalIndex of unassignedPositions) {
+      const pos = getPosition(globalIndex);
+      const isExcludedColumn =
+        pos.col === secondTopColumn || pos.col === secondBottomColumn;
+
+      // For excluded columns, just assign randomly from regular branches
+      if (isExcludedColumn) {
+        assignments[globalIndex] =
+          regularBranchIndices[
+            Math.floor(
+              random(config.randomSeed + globalIndex) *
+                regularBranchIndices.length
+            )
+          ];
+        continue;
+      }
+
+      // Check distance to nearest short branch
+      const minDistance = 2.5; // Minimum preferred distance between short branches
+      const hasNearby = hasNearbyShortBranches(pos, minDistance);
+
+      if (hasNearby) {
+        // If there are nearby short branches, we still need to assign something
+        // but we'll use a weighted random selection that favors longer branches
+        // This helps break up clusters by occasionally using slightly longer regular branches
+        // For now, just assign randomly - the spatial sorting already helps
+        assignments[globalIndex] =
+          regularBranchIndices[
+            Math.floor(
+              random(config.randomSeed + globalIndex) *
+                regularBranchIndices.length
+            )
+          ];
+      } else {
+        // No nearby short branches, safe to place one here
+        assignments[globalIndex] =
+          regularBranchIndices[
+            Math.floor(
+              random(config.randomSeed + globalIndex) *
+                regularBranchIndices.length
+            )
+          ];
+      }
     }
 
     return { totalInstances: total, instanceAssignments: assignments };
