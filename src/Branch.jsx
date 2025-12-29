@@ -314,6 +314,12 @@ function Branch() {
 
     let globalInstanceIndex = 0;
 
+    // Use seed for reproducible randomness
+    const random = (seed) => {
+      let x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    };
+
     // Create transformations for all instances
     for (let col = 0; col < config.columns; col++) {
       // Calculate fold spread for this column
@@ -334,10 +340,22 @@ function Branch() {
       // edgeFactor is 0 at center, 1 at edges
       const edgeFactor = Math.abs(spreadFactor * 2);
       const baseDistanceInward = edgeFactor * 0.3;
-      const totalDistanceInward = baseDistanceInward + config.distanceInward;
+      const baseTotalDistanceInward =
+        baseDistanceInward + config.distanceInward;
 
       // Position instances in a circle for this column
       for (let i = 0; i < config.count; i++) {
+        // Get which branch type this instance should use (needed for distance variation)
+        const branchIndex = instanceAssignments[globalInstanceIndex];
+
+        // Add random distance inward variation (0 to 0.1) for all branches except branch 6
+        const randomDistanceVariation =
+          branchIndex !== 6
+            ? random(config.randomSeed + globalInstanceIndex * 1000) * 0.1
+            : 0;
+        const totalDistanceInward =
+          baseTotalDistanceInward + randomDistanceVariation;
+
         const angle = (i / config.count) * Math.PI * 2 + columnAngleOffset;
 
         // Calculate inward direction (perpendicular to radial)
@@ -407,8 +425,7 @@ function Branch() {
         dummy.scale.set(1, 1, 1);
         dummy.updateMatrix();
 
-        // Get which branch type this instance should use
-        const branchIndex = instanceAssignments[globalInstanceIndex];
+        // Get mesh index for this branch type (branchIndex already retrieved above)
         const meshIndex = branchInstanceIndices[branchIndex];
 
         // Set the matrix for the appropriate branch type's instanced mesh
