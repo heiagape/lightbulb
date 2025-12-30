@@ -316,7 +316,7 @@ function Branch() {
   const goldMetalMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: 0xffde8b, // Light yellowish gold color
-      metalness: 0.8,
+      metalness: 1,
       roughness: 0.4,
     });
   }, []);

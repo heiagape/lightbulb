@@ -15,9 +15,44 @@ function Scene() {
       <color attach="background" args={["#000000"]} />
 
       {/* Lights */}
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[5, 5, 5]} intensity={1.2} />
-      <directionalLight position={[-5, 5, -5]} intensity={0.8} />
+      <ambientLight intensity={1.0} />
+      <directionalLight position={[5, 5, 5]} intensity={1.5} />
+      <directionalLight position={[-5, 5, -5]} intensity={1.0} />
+
+      {/* Point light at the center of the chandelier (simulating lightbulb) */}
+      <pointLight
+        position={[0, 0, 0]}
+        intensity={2.0}
+        distance={10}
+        decay={2}
+        color="#ffffff"
+      />
+
+      {/* Spotlight from above to illuminate the chandelier */}
+      <spotLight
+        position={[0, 5, 0]}
+        angle={Math.PI / 3}
+        penumbra={0.5}
+        intensity={1.5}
+        castShadow
+        color="#ffffff"
+      />
+
+      {/* Additional point lights for better illumination */}
+      <pointLight
+        position={[3, 2, 3]}
+        intensity={1.0}
+        distance={8}
+        decay={2}
+        color="#ffffff"
+      />
+      <pointLight
+        position={[-3, 2, -3]}
+        intensity={1.0}
+        distance={8}
+        decay={2}
+        color="#ffffff"
+      />
 
       {/* Plane at origin */}
       {/* <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -57,6 +92,7 @@ function App() {
       <Canvas
         camera={{ position: [0, 2, 5], fov: 75 }}
         gl={{ antialias: true }}
+        shadows
       >
         <Scene />
       </Canvas>
