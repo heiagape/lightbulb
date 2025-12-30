@@ -46,7 +46,7 @@ export function Stem() {
   // Update material properties when material type changes (without recreating the material)
   useEffect(() => {
     // Only update metalMaterial - never touch blackMaterial
-    if (materialTypeValue === "Platinum") {
+    if (materialTypeValue === "Platinum color") {
       // Update to platinum properties
       metalMaterial.color.set("#e5e4e2");
       metalMaterial.roughness = 0.01;
@@ -56,7 +56,7 @@ export function Stem() {
     } else {
       // Update to gold properties using the color from the GUI
       metalMaterial.color.set(materialControls.goldColor);
-      metalMaterial.roughness = 0.4;
+      metalMaterial.roughness = 0.01;
       metalMaterial.metalness = 0.7;
       metalMaterial.clearcoat = 0;
       metalMaterial.clearcoatRoughness = 0;

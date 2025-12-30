@@ -838,10 +838,10 @@ if (usePositionNormalMap) {
     gl_FragColor = vec4(finalColor, opacity);
 }
 `;
-    
-    const defaultAbsorptionColorObj = new THREE.Color(absorptionColor)
-    const defaultEmissiveColorObj = new THREE.Color(emissive)
-    
+
+    const defaultAbsorptionColorObj = new THREE.Color(absorptionColor);
+    const defaultEmissiveColorObj = new THREE.Color(emissive);
+
     const materialDepthWrite = isBackFace ? false : depthWrite;
     const materialDepthTest = depthTest;
     const materialSide = isBackFace ? THREE.BackSide : THREE.FrontSide;
@@ -921,7 +921,13 @@ if (usePositionNormalMap) {
         usePositionNormalMap: { value: usePositionNormalMap },
         positionFresnelPower: { value: positionFresnelPower },
         positionFresnelIntensity: { value: positionFresnelIntensity },
-        emissive: { value: [defaultEmissiveColorObj.r, defaultEmissiveColorObj.g, defaultEmissiveColorObj.b] },
+        emissive: {
+          value: [
+            defaultEmissiveColorObj.r,
+            defaultEmissiveColorObj.g,
+            defaultEmissiveColorObj.b,
+          ],
+        },
         emissiveIntensity: { value: emissiveIntensity },
       },
       transparent: true,
@@ -964,46 +970,90 @@ if (usePositionNormalMap) {
   // Update material uniforms when props change
   useEffect(() => {
     if (glassMaterial && glassMaterial.uniforms) {
-      if (glassMaterial.uniforms.absorptionPower) glassMaterial.uniforms.absorptionPower.value = absorptionPower
-      if (glassMaterial.uniforms.colorIntensity) glassMaterial.uniforms.colorIntensity.value = colorIntensity
-      if (glassMaterial.uniforms.chromaticAberration) glassMaterial.uniforms.chromaticAberration.value = chromaticAberration
-      if (glassMaterial.uniforms.roughness) glassMaterial.uniforms.roughness.value = roughness
-      if (glassMaterial.uniforms.samples) glassMaterial.uniforms.samples.value = samples
-      if (glassMaterial.uniforms.brightReflectionIntensity) glassMaterial.uniforms.brightReflectionIntensity.value = brightReflectionIntensity
-      if (glassMaterial.uniforms.specularHighlightIntensity) glassMaterial.uniforms.specularHighlightIntensity.value = specularHighlightIntensity
-      if (glassMaterial.uniforms.enableReflections) glassMaterial.uniforms.enableReflections.value = enableReflections
-      if (glassMaterial.uniforms.envIntensity) glassMaterial.uniforms.envIntensity.value = envIntensity
-      if (glassMaterial.uniforms.opacity) glassMaterial.uniforms.opacity.value = opacity
-      if (glassMaterial.uniforms.ior) glassMaterial.uniforms.ior.value = ior
-      if (glassMaterial.uniforms.thickness) glassMaterial.uniforms.thickness.value = thickness
-      if (glassMaterial.uniforms.thicknessMap) glassMaterial.uniforms.thicknessMap.value = thicknessMap
-      if (glassMaterial.uniforms.hasThicknessMap) glassMaterial.uniforms.hasThicknessMap.value = thicknessMap !== null
-      if (glassMaterial.uniforms.reflectionIntensity) glassMaterial.uniforms.reflectionIntensity.value = reflectionIntensity
-      if (glassMaterial.uniforms.transmissionIntensity) glassMaterial.uniforms.transmissionIntensity.value = transmissionIntensity
-      if (glassMaterial.uniforms.brightnessThreshold) glassMaterial.uniforms.brightnessThreshold.value = brightnessThreshold
-      if (glassMaterial.uniforms.brightnessSmoothing) glassMaterial.uniforms.brightnessSmoothing.value = brightnessSmoothing
-      if (glassMaterial.uniforms.filterHDR) glassMaterial.uniforms.filterHDR.value = filterHDR
-      if (glassMaterial.uniforms.cameraNear) glassMaterial.uniforms.cameraNear.value = camera.near
-      if (glassMaterial.uniforms.cameraFar) glassMaterial.uniforms.cameraFar.value = camera.far
-      if (glassMaterial.uniforms.cameraPosition) glassMaterial.uniforms.cameraPosition.value.copy(camera.position)
-      if (glassMaterial.uniforms.edgeReflectionIntensity) glassMaterial.uniforms.edgeReflectionIntensity.value = edgeReflectionIntensity
-      if (glassMaterial.uniforms.edgeReflectionPower) glassMaterial.uniforms.edgeReflectionPower.value = edgeReflectionPower
-      if (glassMaterial.uniforms.edgeReflectionWidth) glassMaterial.uniforms.edgeReflectionWidth.value = edgeReflectionWidth
-      if (glassMaterial.uniforms.normalMap) glassMaterial.uniforms.normalMap.value = normalMap
-      if (glassMaterial.uniforms.useNormalMap) glassMaterial.uniforms.useNormalMap.value = useNormalMap
-      if (glassMaterial.uniforms.normalScale) glassMaterial.uniforms.normalScale.value = normalScale
-      if (glassMaterial.uniforms.curvatureMap) glassMaterial.uniforms.curvatureMap.value = curvatureMap
-      if (glassMaterial.uniforms.useCurvatureMap) glassMaterial.uniforms.useCurvatureMap.value = useCurvatureMap
-      if (glassMaterial.uniforms.curvatureScale) glassMaterial.uniforms.curvatureScale.value = curvatureScale
-      if (glassMaterial.uniforms.enableLighting) glassMaterial.uniforms.enableLighting.value = enableLighting
-      if (glassMaterial.uniforms.specularStrength) glassMaterial.uniforms.specularStrength.value = specularStrength
-      if (glassMaterial.uniforms.shininess) glassMaterial.uniforms.shininess.value = shininess
-      if (glassMaterial.uniforms.positionNormalMap) glassMaterial.uniforms.positionNormalMap.value = positionNormalMap
-      if (glassMaterial.uniforms.usePositionNormalMap) glassMaterial.uniforms.usePositionNormalMap.value = usePositionNormalMap
-      if (glassMaterial.uniforms.positionFresnelPower) glassMaterial.uniforms.positionFresnelPower.value = positionFresnelPower
-      if (glassMaterial.uniforms.positionFresnelIntensity) glassMaterial.uniforms.positionFresnelIntensity.value = positionFresnelIntensity
-      
-      const colorObj = new THREE.Color(absorptionColor)
+      if (glassMaterial.uniforms.absorptionPower)
+        glassMaterial.uniforms.absorptionPower.value = absorptionPower;
+      if (glassMaterial.uniforms.colorIntensity)
+        glassMaterial.uniforms.colorIntensity.value = colorIntensity;
+      if (glassMaterial.uniforms.chromaticAberration)
+        glassMaterial.uniforms.chromaticAberration.value = chromaticAberration;
+      if (glassMaterial.uniforms.roughness)
+        glassMaterial.uniforms.roughness.value = roughness;
+      if (glassMaterial.uniforms.samples)
+        glassMaterial.uniforms.samples.value = samples;
+      if (glassMaterial.uniforms.brightReflectionIntensity)
+        glassMaterial.uniforms.brightReflectionIntensity.value =
+          brightReflectionIntensity;
+      if (glassMaterial.uniforms.specularHighlightIntensity)
+        glassMaterial.uniforms.specularHighlightIntensity.value =
+          specularHighlightIntensity;
+      if (glassMaterial.uniforms.enableReflections)
+        glassMaterial.uniforms.enableReflections.value = enableReflections;
+      if (glassMaterial.uniforms.envIntensity)
+        glassMaterial.uniforms.envIntensity.value = envIntensity;
+      if (glassMaterial.uniforms.opacity)
+        glassMaterial.uniforms.opacity.value = opacity;
+      if (glassMaterial.uniforms.ior) glassMaterial.uniforms.ior.value = ior;
+      if (glassMaterial.uniforms.thickness)
+        glassMaterial.uniforms.thickness.value = thickness;
+      if (glassMaterial.uniforms.thicknessMap)
+        glassMaterial.uniforms.thicknessMap.value = thicknessMap;
+      if (glassMaterial.uniforms.hasThicknessMap)
+        glassMaterial.uniforms.hasThicknessMap.value = thicknessMap !== null;
+      if (glassMaterial.uniforms.reflectionIntensity)
+        glassMaterial.uniforms.reflectionIntensity.value = reflectionIntensity;
+      if (glassMaterial.uniforms.transmissionIntensity)
+        glassMaterial.uniforms.transmissionIntensity.value =
+          transmissionIntensity;
+      if (glassMaterial.uniforms.brightnessThreshold)
+        glassMaterial.uniforms.brightnessThreshold.value = brightnessThreshold;
+      if (glassMaterial.uniforms.brightnessSmoothing)
+        glassMaterial.uniforms.brightnessSmoothing.value = brightnessSmoothing;
+      if (glassMaterial.uniforms.filterHDR)
+        glassMaterial.uniforms.filterHDR.value = filterHDR;
+      if (glassMaterial.uniforms.cameraNear)
+        glassMaterial.uniforms.cameraNear.value = camera.near;
+      if (glassMaterial.uniforms.cameraFar)
+        glassMaterial.uniforms.cameraFar.value = camera.far;
+      if (glassMaterial.uniforms.cameraPosition)
+        glassMaterial.uniforms.cameraPosition.value.copy(camera.position);
+      if (glassMaterial.uniforms.edgeReflectionIntensity)
+        glassMaterial.uniforms.edgeReflectionIntensity.value =
+          edgeReflectionIntensity;
+      if (glassMaterial.uniforms.edgeReflectionPower)
+        glassMaterial.uniforms.edgeReflectionPower.value = edgeReflectionPower;
+      if (glassMaterial.uniforms.edgeReflectionWidth)
+        glassMaterial.uniforms.edgeReflectionWidth.value = edgeReflectionWidth;
+      if (glassMaterial.uniforms.normalMap)
+        glassMaterial.uniforms.normalMap.value = normalMap;
+      if (glassMaterial.uniforms.useNormalMap)
+        glassMaterial.uniforms.useNormalMap.value = useNormalMap;
+      if (glassMaterial.uniforms.normalScale)
+        glassMaterial.uniforms.normalScale.value = normalScale;
+      if (glassMaterial.uniforms.curvatureMap)
+        glassMaterial.uniforms.curvatureMap.value = curvatureMap;
+      if (glassMaterial.uniforms.useCurvatureMap)
+        glassMaterial.uniforms.useCurvatureMap.value = useCurvatureMap;
+      if (glassMaterial.uniforms.curvatureScale)
+        glassMaterial.uniforms.curvatureScale.value = curvatureScale;
+      if (glassMaterial.uniforms.enableLighting)
+        glassMaterial.uniforms.enableLighting.value = enableLighting;
+      if (glassMaterial.uniforms.specularStrength)
+        glassMaterial.uniforms.specularStrength.value = specularStrength;
+      if (glassMaterial.uniforms.shininess)
+        glassMaterial.uniforms.shininess.value = shininess;
+      if (glassMaterial.uniforms.positionNormalMap)
+        glassMaterial.uniforms.positionNormalMap.value = positionNormalMap;
+      if (glassMaterial.uniforms.usePositionNormalMap)
+        glassMaterial.uniforms.usePositionNormalMap.value =
+          usePositionNormalMap;
+      if (glassMaterial.uniforms.positionFresnelPower)
+        glassMaterial.uniforms.positionFresnelPower.value =
+          positionFresnelPower;
+      if (glassMaterial.uniforms.positionFresnelIntensity)
+        glassMaterial.uniforms.positionFresnelIntensity.value =
+          positionFresnelIntensity;
+
+      const colorObj = new THREE.Color(absorptionColor);
       if (glassMaterial.uniforms.absorptionColor) {
         glassMaterial.uniforms.absorptionColor.value = [
           colorObj.r,
@@ -1012,12 +1062,16 @@ if (usePositionNormalMap) {
         ];
       }
 
-      const emissiveObj = new THREE.Color(emissive)
+      const emissiveObj = new THREE.Color(emissive);
       if (glassMaterial.uniforms.emissive) {
-        glassMaterial.uniforms.emissive.value = [emissiveObj.r, emissiveObj.g, emissiveObj.b]
+        glassMaterial.uniforms.emissive.value = [
+          emissiveObj.r,
+          emissiveObj.g,
+          emissiveObj.b,
+        ];
       }
       if (glassMaterial.uniforms.emissiveIntensity) {
-        glassMaterial.uniforms.emissiveIntensity.value = emissiveIntensity
+        glassMaterial.uniforms.emissiveIntensity.value = emissiveIntensity;
       }
     }
   }, [
@@ -1347,7 +1401,7 @@ const CustomGlassMaterial = React.forwardRef(
       colorIntensity = 1.0,
       reflectionIntensity = 0.9,
       transmissionIntensity = 0.6,
-      chromaticAberration = 0.05,
+      chromaticAberration = 0.1,
       roughness = 0.0,
       samples = 3,
       farPlaneZ = 200,

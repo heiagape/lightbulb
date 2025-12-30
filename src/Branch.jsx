@@ -42,7 +42,7 @@ function Branch() {
       label: "Overall Fold",
     },
     angleOffset: {
-      value: -1.14,
+      value: -0.9,
       min: -Math.PI / 2,
       max: Math.PI / 2,
       step: 0.1,
@@ -64,8 +64,10 @@ function Branch() {
 
   // Material type control with buttons and color picker
   const materialControls = useControls("Material", {
-    "Switch to Platinum": button(() => setGlobalMaterialType("Platinum")),
-    "Switch to Gold": button(() => setGlobalMaterialType("Gold")),
+    "Switch to Platinum color": button(() =>
+      setGlobalMaterialType("Platinum color")
+    ),
+    "Switch to Gold color": button(() => setGlobalMaterialType("Gold color")),
     goldColor: {
       value: "#deae4a",
       label: "Gold Color",
@@ -342,7 +344,7 @@ function Branch() {
   // Update material properties when material type changes (without recreating the material)
   useEffect(() => {
     // Only update goldMetalMaterial - never touch blackMaterial
-    if (materialTypeValue === "Platinum") {
+    if (materialTypeValue === "Platinum color") {
       // Update to platinum properties
       goldMetalMaterial.color.set("#e5e4e2");
       goldMetalMaterial.roughness = 0.01;
@@ -352,7 +354,7 @@ function Branch() {
     } else {
       // Update to gold properties using the color from the GUI
       goldMetalMaterial.color.set(materialControls.goldColor);
-      goldMetalMaterial.roughness = 0.1;
+      goldMetalMaterial.roughness = 0.01;
       goldMetalMaterial.metalness = 1;
       goldMetalMaterial.clearcoat = 0;
       goldMetalMaterial.clearcoatRoughness = 0;

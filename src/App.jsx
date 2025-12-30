@@ -2,6 +2,7 @@ import { Suspense, useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import { ToneMappingMode } from "postprocessing";
+import * as THREE from "three";
 import {
   EffectComposer,
   Bloom,
@@ -50,8 +51,18 @@ function Scene() {
         <EnvironmentLighting />
       </Suspense>
 
-      {/* Black Background */}
-      <color attach="background" args={["#171717"]} />
+      {/* Grey Background - rendered as mesh to work with postprocessing */}
+      {/* Color is brighter to compensate for ToneMapping darkening */}
+      <Suspense fallback={null}>
+        <mesh>
+          <sphereGeometry args={[500, 32, 32]} />
+          <meshBasicMaterial
+            color="#2a2a2a"
+            side={THREE.BackSide}
+            depthWrite={false}
+          />
+        </mesh>
+      </Suspense>
 
       {/* Three-Point Lighting Setup */}
       {/* Key Light - Main light source, positioned at 45 degrees front-right */}
@@ -109,18 +120,20 @@ function Scene() {
         maxPolarAngle={Math.PI / 2}
       />
 
-      {/* Post Processing - Conditional */}
-      {postProcessing.enabled && (
-        <EffectComposer>
-          <Bloom
-            luminanceThreshold={0.4}
-            luminanceSmoothing={0.9}
-            intensity={0.26}
-            mipmapBlur
-          />
-          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        </EffectComposer>
-      )}
+      {/* Post Processing - Always render composer to prevent accumulation issues */}
+      <EffectComposer>
+        {postProcessing.enabled && (
+          <>
+            <Bloom
+              luminanceThreshold={0.7}
+              luminanceSmoothing={0.9}
+              intensity={0.1}
+              mipmapBlur
+            />
+            <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+          </>
+        )}
+      </EffectComposer>
     </>
   );
 }
