@@ -38,7 +38,7 @@ export function Stem() {
     return new THREE.MeshStandardMaterial({
       color: 0xd5a945, // Gold color (default)
       metalness: 0.7,
-      roughness: 0.4,
+      roughness: 0.3,
     });
   }, []);
 

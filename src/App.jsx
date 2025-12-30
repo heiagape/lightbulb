@@ -43,9 +43,6 @@ function Scene() {
 
   return (
     <>
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[5, 5, 5]} intensity={1.2} />
-      <directionalLight position={[-5, 5, -5]} intensity={0.8} />
       {/* Environment Map Lighting - provides environment lighting for all materials */}
       <Suspense fallback={null}>
         <EnvironmentLighting />
@@ -64,26 +61,6 @@ function Scene() {
         </mesh>
       </Suspense>
 
-      {/* Three-Point Lighting Setup */}
-      {/* Key Light - Main light source, positioned at 45 degrees front-right */}
-      <directionalLight
-        position={[5, 5, 5]}
-        intensity={1.5}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-      />
-
-      {/* Fill Light - Softer light, positioned opposite key light to fill shadows */}
-      {/* <directionalLight position={[-4, 3, 4]} intensity={1} color="#ffffff" />/ */}
-
-      {/* Rim/Back Light - Edge light positioned behind the subject */}
-      {/* <directionalLight position={[0, 3, -6]} intensity={14} color="#ffffff" /> */}
-
-      {/* Ambient light for overall scene illumination */}
-      {/* <ambientLight intensity={100} /> */}
-
-      {/* Lights - warm gold-tinted for chandelier effect */}
       <ambientLight intensity={0.3} color="#1a1a1a" />
       <directionalLight position={[5, 5, 5]} intensity={1.5} color="#fff5e6" />
       <directionalLight
