@@ -51,6 +51,8 @@ export function useCustomGlassMaterial({
   positionFresnelIntensity = 0.5,
   enabledLightNames = null,
   useInstancing = false,
+  emissive = "#000000",
+  emissiveIntensity = 1.0,
 }) {
   const materialRef = useRef()
   const { scene, gl, camera } = useThree()
@@ -284,6 +286,8 @@ uniform sampler2D positionNormalMap;
 uniform bool usePositionNormalMap;
 uniform float positionFresnelPower;
 uniform float positionFresnelIntensity;
+uniform vec3 emissive;
+uniform float emissiveIntensity;
 
 // Lighting uniforms (specular only)
 uniform bool enableLighting;
@@ -799,12 +803,15 @@ if (usePositionNormalMap) {
     // Apply position-based darkening
     finalColor *= positionDarkening;
 
+    // Add emissive
+    finalColor += emissive * emissiveIntensity;
    
     gl_FragColor = vec4(finalColor, opacity);
 }
 `;
     
     const defaultAbsorptionColorObj = new THREE.Color(absorptionColor)
+    const defaultEmissiveColorObj = new THREE.Color(emissive)
     
     const materialDepthWrite = isBackFace ? false : depthWrite;
     const materialDepthTest = depthTest;
@@ -877,6 +884,8 @@ if (usePositionNormalMap) {
         usePositionNormalMap: { value: usePositionNormalMap },
         positionFresnelPower: { value: positionFresnelPower },
         positionFresnelIntensity: { value: positionFresnelIntensity },
+        emissive: { value: [defaultEmissiveColorObj.r, defaultEmissiveColorObj.g, defaultEmissiveColorObj.b] },
+        emissiveIntensity: { value: emissiveIntensity },
       },
       transparent: true,
       side: materialSide,
@@ -932,12 +941,21 @@ if (usePositionNormalMap) {
       if (glassMaterial.uniforms.usePositionNormalMap) glassMaterial.uniforms.usePositionNormalMap.value = usePositionNormalMap
       if (glassMaterial.uniforms.positionFresnelPower) glassMaterial.uniforms.positionFresnelPower.value = positionFresnelPower
       if (glassMaterial.uniforms.positionFresnelIntensity) glassMaterial.uniforms.positionFresnelIntensity.value = positionFresnelIntensity
+      
       const colorObj = new THREE.Color(absorptionColor)
       if (glassMaterial.uniforms.absorptionColor) {
         glassMaterial.uniforms.absorptionColor.value = [colorObj.r, colorObj.g, colorObj.b]
       }
+
+      const emissiveObj = new THREE.Color(emissive)
+      if (glassMaterial.uniforms.emissive) {
+        glassMaterial.uniforms.emissive.value = [emissiveObj.r, emissiveObj.g, emissiveObj.b]
+      }
+      if (glassMaterial.uniforms.emissiveIntensity) {
+        glassMaterial.uniforms.emissiveIntensity.value = emissiveIntensity
+      }
     }
-  }, [glassMaterial, absorptionPower, colorIntensity, reflectionIntensity, transmissionIntensity, chromaticAberration, roughness, samples, absorptionColor, brightReflectionIntensity, specularHighlightIntensity, enableReflections, envIntensity, opacity, ior, thickness, thicknessMap, brightnessThreshold, brightnessSmoothing, filterHDR, edgeReflectionIntensity, edgeReflectionPower, edgeReflectionWidth, camera, normalMap, useNormalMap, normalScale, curvatureMap, useCurvatureMap, curvatureScale, enableLighting, specularStrength, shininess, positionNormalMap, usePositionNormalMap, positionFresnelPower, positionFresnelIntensity ])
+  }, [glassMaterial, absorptionPower, colorIntensity, reflectionIntensity, transmissionIntensity, chromaticAberration, roughness, samples, absorptionColor, brightReflectionIntensity, specularHighlightIntensity, enableReflections, envIntensity, opacity, ior, thickness, thicknessMap, brightnessThreshold, brightnessSmoothing, filterHDR, edgeReflectionIntensity, edgeReflectionPower, edgeReflectionWidth, camera, normalMap, useNormalMap, normalScale, curvatureMap, useCurvatureMap, curvatureScale, enableLighting, specularStrength, shininess, positionNormalMap, usePositionNormalMap, positionFresnelPower, positionFresnelIntensity, emissive, emissiveIntensity ])
 
   // Update environment map and background scene
   useEffect(() => {
@@ -1218,6 +1236,8 @@ const CustomGlassMaterial = React.forwardRef(({
   positionFresnelIntensity = 1.0,
   enabledLightNames = null,
   useInstancing = false,
+  emissive = "#000000",
+  emissiveIntensity = 1.0,
   ...props 
 }, ref) => {
   const material = useCustomGlassMaterial({
@@ -1268,6 +1288,8 @@ const CustomGlassMaterial = React.forwardRef(({
     positionFresnelIntensity,
     enabledLightNames,
     useInstancing,
+    emissive,
+    emissiveIntensity,
   })
 
   useEffect(() => {
