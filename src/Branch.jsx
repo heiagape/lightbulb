@@ -1,9 +1,10 @@
 import { useRef, useEffect, useMemo } from "react";
 import { useLoader, useFrame } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { useControls } from "leva";
+import { useControls, button } from "leva";
 import * as THREE from "three";
 import { MiracleGlass } from "./GlassMaterials";
+import { useMaterialType, setGlobalMaterialType } from "./materialState";
 
 // Branch component - creates instanced meshes from multiple branch models
 function Branch() {
@@ -56,6 +57,15 @@ function Branch() {
     },
     randomSeed: { value: 80, min: 1, max: 100, step: 1, label: "Random Seed" },
     autoRotate: { value: true, label: "Auto Rotate" },
+  });
+
+  // Material type from shared state
+  const materialTypeValue = useMaterialType();
+
+  // Material type control with buttons
+  useControls("Material", {
+    "Switch to Platinum": button(() => setGlobalMaterialType("Platinum")),
+    "Switch to Gold": button(() => setGlobalMaterialType("Gold")),
   });
 
   // Hidden config values (not in GUI)
@@ -312,14 +322,35 @@ function Branch() {
     return new THREE.MeshStandardMaterial({ color: 0x000000 });
   }, []);
 
-  // Create subtle gold metal material for non-glass, non-17363 meshes
+  // Create metal material (gold or platinum) for non-glass, non-17363 meshes
+  // Use useMemo to create material once, then update properties via useEffect
   const goldMetalMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: 0xffde8b, // Light yellowish gold color
+      color: 0xffde8b, // Light yellowish gold color (default)
       metalness: 1,
       roughness: 0.1,
     });
   }, []);
+
+  // Update material properties when material type changes (without recreating the material)
+  useEffect(() => {
+    if (materialTypeValue === "Platinum") {
+      // Update to platinum properties
+      goldMetalMaterial.color.set("#e5e4e2");
+      goldMetalMaterial.roughness = 0.01;
+      goldMetalMaterial.metalness = 1.0;
+      goldMetalMaterial.clearcoat = 0.3;
+      goldMetalMaterial.clearcoatRoughness = 0.1;
+    } else {
+      // Update to gold properties
+      goldMetalMaterial.color.set(0xffde8b);
+      goldMetalMaterial.roughness = 0.1;
+      goldMetalMaterial.metalness = 1;
+      goldMetalMaterial.clearcoat = 0;
+      goldMetalMaterial.clearcoatRoughness = 0;
+    }
+    goldMetalMaterial.needsUpdate = true;
+  }, [materialTypeValue, goldMetalMaterial]);
 
   useEffect(() => {
     if (branchMeshData.length === 0) return;
