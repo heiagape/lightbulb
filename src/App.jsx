@@ -40,7 +40,7 @@ function Scene() {
       </Suspense>
 
       {/* Black Background */}
-      <color attach="background" args={["#000a0a"]} />
+      <color attach="background" args={["#171717"]} />
 
       {/* Three-Point Lighting Setup */}
       {/* Key Light - Main light source, positioned at 45 degrees front-right */}
