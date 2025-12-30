@@ -185,12 +185,11 @@ export const useEnvironmentMap = (hdrPath) => {
   return envMapCube;
 };
 
-
 export const MiracleGlass = ({ ref: materialRef, ...props }) => {
   // const envMap = useEnvironmentMap('/hdris/dresden_station_night_2k.hdr');
   //  const envMap = useEnvironmentMap('/hdris/metro_noord_2k.hdr');
   //const envMap = useEnvironmentMap('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/brown_photostudio_06_2k.hdr');
-  const envMap = useEnvironmentMap("/colorful_studio_4k.hdr");
+  const envMap = useEnvironmentMap("/hdris/colorful_studio_1k.hdr");
 
   return (
     <CustomGlassMaterial
@@ -205,7 +204,7 @@ export const MiracleGlass = ({ ref: materialRef, ...props }) => {
  * Reusable glass material component for La Vie Est Belle bottles
  */
 // export const LaVieEstBelleGlass = ({ ref: materialRef, ...props }) => {
-//   const envMap = useEnvironmentMap('/hdris/colorful_studio_4k.hdr');
+//   const envMap = useEnvironmentMap('/hdris/colorful_studio_1k.hdr');
 
 //   return (
 //     <CustomGlassMaterial
@@ -221,7 +220,7 @@ export const MiracleGlass = ({ ref: materialRef, ...props }) => {
 //  * Reusable glass material component for Idole bottles
 //  */
 // export const IdoleGlass = ({ ref: materialRef, ...props }) => {
-//   const envMap = useEnvironmentMap('/hdris/colorful_studio_4k.hdr');
+//   const envMap = useEnvironmentMap('/hdris/colorful_studio_1k.hdr');
 
 //   return (
 //     <CustomGlassMaterial
@@ -237,7 +236,7 @@ export const MiracleGlass = ({ ref: materialRef, ...props }) => {
 //  * Reusable glass material component for Miracle bottles
 //  */
 // export const MiracleGlass = ({ ref: materialRef, ...props }) => {
-//   const envMap = useEnvironmentMap('/hdris/colorful_studio_4k.hdr');
+//   const envMap = useEnvironmentMap('/hdris/colorful_studio_1k.hdr');
 
 //   return (
 //     <CustomGlassMaterial
@@ -253,7 +252,7 @@ export const MiracleGlass = ({ ref: materialRef, ...props }) => {
 //  * Reusable glass material component for Tresor bottles
 //  */
 // export const TresorGlass = ({ ref: materialRef, ...props }) => {
-//   const envMap = useEnvironmentMap('/hdris/colorful_studio_4k.hdr');
+//   const envMap = useEnvironmentMap('/hdris/colorful_studio_1k.hdr');
 
 //   return (
 //     <CustomGlassMaterial
@@ -270,7 +269,7 @@ export const MiracleGlass = ({ ref: materialRef, ...props }) => {
 //  */
 // export const CustomGlass = ({
 //   ref: materialRef,
-//   hdrPath = '/hdris/colorful_studio_4k.hdr',
+//   hdrPath = '/hdris/colorful_studio_1k.hdr',
 //   config = defaultGlassConfig,
 //   ...props
 // }) => {

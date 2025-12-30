@@ -39,7 +39,7 @@ function Scene() {
       <color attach="background" args={["#050507"]} />
 
       {/* Environment for realistic reflections */}
-      <Environment files="/colorful_studio_4k.hdr" />
+      <Environment files="/hdris/metro_noord_1k.hdr" />
 
       {/* Lights - warm gold-tinted for chandelier effect */}
       <ambientLight intensity={0.3} color="#1a1a1a" />
@@ -105,8 +105,12 @@ function App() {
       }}
     >
       <Canvas
-        camera={{ position: [0, 2, 5], fov: 75 }}
-        gl={{ antialias: true, toneMapping: 0 }}
+        camera={{ position: [2, 2, 2], fov: 75 }}
+        gl={{
+          antialias: true,
+          toneMapping: 0,
+          powerPreference: "high-performance",
+        }}
       >
         <Scene />
       </Canvas>
