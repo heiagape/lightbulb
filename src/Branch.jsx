@@ -62,10 +62,14 @@ function Branch() {
   // Material type from shared state
   const materialTypeValue = useMaterialType();
 
-  // Material type control with buttons
-  useControls("Material", {
+  // Material type control with buttons and color picker
+  const materialControls = useControls("Material", {
     "Switch to Platinum": button(() => setGlobalMaterialType("Platinum")),
     "Switch to Gold": button(() => setGlobalMaterialType("Gold")),
+    goldColor: {
+      value: "#e2b42a",
+      label: "Gold Color",
+    },
   });
 
   // Hidden config values (not in GUI)
@@ -326,7 +330,7 @@ function Branch() {
   // Use useMemo to create material once, then update properties via useEffect
   const goldMetalMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: 0xffde8b, // Light yellowish gold color (default)
+      color: 0xe2b42a, // Gold color (default)
       metalness: 1,
       roughness: 0.1,
     });
@@ -334,6 +338,7 @@ function Branch() {
 
   // Update material properties when material type changes (without recreating the material)
   useEffect(() => {
+    // Only update goldMetalMaterial - never touch blackMaterial
     if (materialTypeValue === "Platinum") {
       // Update to platinum properties
       goldMetalMaterial.color.set("#e5e4e2");
@@ -342,15 +347,26 @@ function Branch() {
       goldMetalMaterial.clearcoat = 0.3;
       goldMetalMaterial.clearcoatRoughness = 0.1;
     } else {
-      // Update to gold properties
-      goldMetalMaterial.color.set(0xffde8b);
+      // Update to gold properties using the color from the GUI
+      goldMetalMaterial.color.set(materialControls.goldColor);
       goldMetalMaterial.roughness = 0.1;
       goldMetalMaterial.metalness = 1;
       goldMetalMaterial.clearcoat = 0;
       goldMetalMaterial.clearcoatRoughness = 0;
     }
     goldMetalMaterial.needsUpdate = true;
-  }, [materialTypeValue, goldMetalMaterial]);
+
+    // Ensure blackMaterial always stays black (safety check)
+    if (blackMaterial.color.getHex() !== 0x000000) {
+      blackMaterial.color.set(0x000000);
+      blackMaterial.needsUpdate = true;
+    }
+  }, [
+    materialTypeValue,
+    materialControls.goldColor,
+    goldMetalMaterial,
+    blackMaterial,
+  ]);
 
   useEffect(() => {
     if (branchMeshData.length === 0) return;
@@ -522,12 +538,21 @@ function Branch() {
             meshData.name === "MET-59_3D-Model17661";
 
           // Check if the mesh name contains "17363" - use black material
-          const isBlackMesh = meshData.name.includes("17363");
-          const materialToUse = isGlassMesh
-            ? null
-            : isBlackMesh
-            ? blackMaterial
-            : goldMetalMaterial; // Use gold metal for all other non-glass meshes
+          // IMPORTANT: Only meshes with "17363" in the name should use blackMaterial
+          // Explicitly exclude "17659" from black material
+          const is17659 = meshData.name.includes("17659");
+          const is17363 = meshData.name.includes("17363");
+          const isBlackMesh = is17363 && !is17659; // Only black if it has "17363" but NOT "17659"
+          let materialToUse = null;
+
+          if (isGlassMesh) {
+            materialToUse = null; // Glass meshes use MiracleGlass material
+          } else if (isBlackMesh) {
+            materialToUse = blackMaterial; // ONLY 17363 meshes (not 17659) get black material
+          } else {
+            // All other non-glass, non-17363 meshes (including "17659") get gold/platinum material
+            materialToUse = goldMetalMaterial;
+          }
 
           return (
             <>

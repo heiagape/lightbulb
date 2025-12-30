@@ -12,7 +12,7 @@ function Scene() {
   return (
     <>
       {/* Black Background */}
-      <color attach="background" args={["#000000"]} />
+      <color attach="background" args={["#000a0a"]} />
 
       {/* Three-Point Lighting Setup */}
       {/* Key Light - Main light source, positioned at 45 degrees front-right */}
