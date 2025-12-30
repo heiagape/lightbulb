@@ -95,6 +95,7 @@ function Scene() {
         minDistance={2}
         maxDistance={4}
         maxPolarAngle={Math.PI / 2}
+        minPolarAngle={Math.PI / 4}
       />
 
       {/* Post Processing - Always render composer to prevent accumulation issues */}
