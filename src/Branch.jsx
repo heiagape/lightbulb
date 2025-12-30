@@ -29,29 +29,29 @@ function Branch() {
     columns: { value: 7, min: 6, max: 10, step: 1, label: "Columns" },
     tiltFoldY: {
       value: 1.75,
-      min: 0,
-      max: 4,
+      min: 1.2,
+      max: 2.2,
       step: 0.05,
       label: "Tilt Fold Y",
     },
     overallFold: {
       value: 0.0,
-      min: -0.2,
+      min: -0.1,
       max: 0.2,
       step: 0.01,
       label: "Overall Fold",
     },
     angleOffset: {
-      value: 1.6,
-      min: -Math.PI,
-      max: Math.PI,
+      value: -1.14,
+      min: -Math.PI / 2,
+      max: Math.PI / 2,
       step: 0.1,
       label: "Rotation Offset",
     },
     distanceOut: {
       value: 0.07,
       min: -0.05,
-      max: 0.2,
+      max: 0.07,
       step: 0.001,
       label: "Distance Out",
     },
@@ -323,7 +323,10 @@ function Branch() {
 
   // Create black material for meshes with "17363" in their name
   const blackMaterial = useMemo(() => {
-    return new THREE.MeshStandardMaterial({ color: 0x000000 });
+    return new THREE.MeshStandardMaterial({
+      color: 0x000000,
+      roughness: 0.4,
+    });
   }, []);
 
   // Create metal material (gold or platinum) for non-glass, non-17363 meshes
@@ -537,20 +540,20 @@ function Branch() {
             meshData.name.toLowerCase().includes("glass") ||
             meshData.name === "MET-59_3D-Model17661";
 
-          // Check if the mesh name contains "17363" - use black material
-          // IMPORTANT: Only meshes with "17363" in the name should use blackMaterial
-          // Explicitly exclude "17659" from black material
+          // Check if the mesh name contains "17363" or "17659"
           const is17659 = meshData.name.includes("17659");
           const is17363 = meshData.name.includes("17363");
-          const isBlackMesh = is17363 && !is17659; // Only black if it has "17363" but NOT "17659"
           let materialToUse = null;
 
-          if (isGlassMesh) {
+          // PRIORITY CHECK: Mesh 17659 ALWAYS gets metal material FIRST (regardless of other conditions)
+          if (is17659 && !isGlassMesh) {
+            materialToUse = goldMetalMaterial; // Mesh 17659 always gets gold/platinum material
+          } else if (isGlassMesh) {
             materialToUse = null; // Glass meshes use MiracleGlass material
-          } else if (isBlackMesh) {
-            materialToUse = blackMaterial; // ONLY 17363 meshes (not 17659) get black material
+          } else if (is17363 && !is17659) {
+            materialToUse = blackMaterial; // ONLY 17363 meshes (NOT "17659") get black material
           } else {
-            // All other non-glass, non-17363 meshes (including "17659") get gold/platinum material
+            // All other non-glass, non-17363 meshes get gold/platinum material
             materialToUse = goldMetalMaterial;
           }
 

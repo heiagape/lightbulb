@@ -26,7 +26,10 @@ export function Stem() {
 
   // Create materials based on material type
   const blackMaterial = useMemo(() => {
-    return new THREE.MeshStandardMaterial({ color: 0x000000 });
+    return new THREE.MeshStandardMaterial({
+      color: 0x000000,
+      roughness: 0.4,
+    });
   }, []);
 
   // Create metal material once, then update properties via useEffect
@@ -75,7 +78,7 @@ export function Stem() {
   useEffect(() => {
     gltf.scene.traverse((child) => {
       if (child.isMesh) {
-        // Explicitly check for "17659" - it should NEVER get black material
+        // Explicitly check for "17659" - it should ALWAYS get metal material (gold/platinum)
         const is17659 = child.name.includes("17659");
         const is17363 = child.name.includes("17363");
 
@@ -91,11 +94,14 @@ export function Stem() {
           child.name.toLowerCase().includes("glass") ||
           child.name === "MET-59_3D-Model17661";
 
-        // Only "17363" meshes get black material (explicitly exclude "17659")
-        if (is17363 && !is17659) {
+        // PRIORITY CHECK: Mesh 17659 ALWAYS gets metal material FIRST (regardless of other conditions)
+        if (is17659 && !isGlassMesh) {
+          child.material = metalMaterial;
+        } else if (is17363 && !is17659) {
+          // Only "17363" meshes (NOT "17659") get black material
           child.material = blackMaterial;
         } else if (!isGlassMesh) {
-          // All other non-glass meshes (including "17659") get metal material (gold/platinum)
+          // All other non-glass meshes get metal material (gold/platinum)
           child.material = metalMaterial;
         }
       }
