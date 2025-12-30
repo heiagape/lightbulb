@@ -323,7 +323,7 @@ function Branch() {
     return counts;
   }, [instanceAssignments]);
 
-  // Create black material for meshes with "17363", "17662", "17467", "17468", or "17364" in their name
+  // Create black material for meshes with "17363", "17662", "17467", "17468", "17364", "17838", "17839", or "17762" in their name
   const blackMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: 0x000000,
@@ -549,8 +549,18 @@ function Branch() {
           const is17467 = meshData.name.includes("17467");
           const is17468 = meshData.name.includes("17468");
           const is17364 = meshData.name.includes("17364");
+          const is17838 = meshData.name.includes("17838");
+          const is17839 = meshData.name.includes("17839");
+          const is17762 = meshData.name.includes("17762");
           const isBlackMaterialMesh =
-            is17363 || is17662 || is17467 || is17468 || is17364;
+            is17363 ||
+            is17662 ||
+            is17467 ||
+            is17468 ||
+            is17364 ||
+            is17838 ||
+            is17839 ||
+            is17762;
           let materialToUse = null;
 
           // PRIORITY CHECK: Mesh 17659 ALWAYS gets metal material FIRST (regardless of other conditions)
@@ -559,7 +569,7 @@ function Branch() {
           } else if (isGlassMesh) {
             materialToUse = null; // Glass meshes use MiracleGlass material
           } else if (isBlackMaterialMesh && !is17659) {
-            materialToUse = blackMaterial; // Meshes with 17363, 17662, 17467, 17468, or 17364 (NOT "17659") get black material
+            materialToUse = blackMaterial; // Meshes with 17363, 17662, 17467, 17468, 17364, 17838, 17839, or 17762 (NOT "17659") get black material
           } else {
             // All other non-glass, non-black-material meshes get gold/platinum material
             materialToUse = goldMetalMaterial;
