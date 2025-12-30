@@ -524,7 +524,7 @@ function Branch() {
   // Auto-rotation animation
   useFrame((state, delta) => {
     if (config.autoRotate && groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.2; // Slow rotation (0.2 radians per second)
+      groupRef.current.rotation.y += delta * 0.06; // Slow rotation (0.06 radians per second - 70% slower)
     }
   });
 
