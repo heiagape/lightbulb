@@ -6,7 +6,6 @@ import { useMaterialType } from "./materialState";
 import { useControls } from "leva";
 import { TextureLoader } from "three";
 
-
 // Hook to load the Stem.glb model
 export function useStem() {
   const gltf = useLoader(GLTFLoader, "/assets/Stem.glb");
@@ -21,7 +20,7 @@ export function Stem() {
   // Material color control (shared with Branch component via Leva panel)
   const materialControls = useControls("Material", {
     goldColor: {
-      value: "#deae4a",
+      value: "#aa9e83",
       label: "Gold Color",
     },
   });
@@ -30,14 +29,14 @@ export function Stem() {
   const blackMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: 0x000000,
-      roughness: 0.4,
+      roughness: 0.1,
     });
   }, []);
 
   // Create metal material once, then update properties via useEffect
   const metalMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: 0xdeae4a, // Gold color (default)
+      color: 0xaa9e83, // Gold color (default)
       metalness: 0.7,
       roughness: 0.4,
     });

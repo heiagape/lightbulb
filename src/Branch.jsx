@@ -69,7 +69,7 @@ function Branch() {
     ),
     "Switch to Gold color": button(() => setGlobalMaterialType("Gold color")),
     goldColor: {
-      value: "#deae4a",
+      value: "#aa9e83",
       label: "Gold Color",
     },
   });
@@ -335,7 +335,7 @@ function Branch() {
   // Use useMemo to create material once, then update properties via useEffect
   const goldMetalMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: 0xdeae4a, // Gold color (default)
+      color: 0xaa9e83, // Gold color (default)
       metalness: 1,
       roughness: 0.1,
     });
