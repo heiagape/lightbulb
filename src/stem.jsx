@@ -29,7 +29,7 @@ export function Stem() {
   const blackMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: 0x000000,
-      roughness: 0.1,
+      roughness: 0.25,
     });
   }, []);
 

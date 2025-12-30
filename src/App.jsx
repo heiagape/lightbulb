@@ -125,9 +125,9 @@ function Scene() {
         {postProcessing.enabled && (
           <>
             <Bloom
-              luminanceThreshold={0.7}
+              luminanceThreshold={0.9}
               luminanceSmoothing={0.9}
-              intensity={0.1}
+              intensity={0.07}
               mipmapBlur
             />
             <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
