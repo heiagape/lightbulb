@@ -323,11 +323,11 @@ function Branch() {
     return counts;
   }, [instanceAssignments]);
 
-  // Create black material for meshes with "17363" in their name
+  // Create black material for meshes with "17363", "17662", "17467", "17468", or "17364" in their name
   const blackMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: 0x000000,
-      roughness: 0.4,
+      roughness: 0.25,
     });
   }, []);
 
@@ -542,9 +542,15 @@ function Branch() {
             meshData.name.toLowerCase().includes("glass") ||
             meshData.name === "MET-59_3D-Model17661";
 
-          // Check if the mesh name contains "17363" or "17659"
+          // Check if the mesh name contains specific numbers
           const is17659 = meshData.name.includes("17659");
           const is17363 = meshData.name.includes("17363");
+          const is17662 = meshData.name.includes("17662");
+          const is17467 = meshData.name.includes("17467");
+          const is17468 = meshData.name.includes("17468");
+          const is17364 = meshData.name.includes("17364");
+          const isBlackMaterialMesh =
+            is17363 || is17662 || is17467 || is17468 || is17364;
           let materialToUse = null;
 
           // PRIORITY CHECK: Mesh 17659 ALWAYS gets metal material FIRST (regardless of other conditions)
@@ -552,10 +558,10 @@ function Branch() {
             materialToUse = goldMetalMaterial; // Mesh 17659 always gets gold/platinum material
           } else if (isGlassMesh) {
             materialToUse = null; // Glass meshes use MiracleGlass material
-          } else if (is17363 && !is17659) {
-            materialToUse = blackMaterial; // ONLY 17363 meshes (NOT "17659") get black material
+          } else if (isBlackMaterialMesh && !is17659) {
+            materialToUse = blackMaterial; // Meshes with 17363, 17662, 17467, 17468, or 17364 (NOT "17659") get black material
           } else {
-            // All other non-glass, non-17363 meshes get gold/platinum material
+            // All other non-glass, non-black-material meshes get gold/platinum material
             materialToUse = goldMetalMaterial;
           }
 
