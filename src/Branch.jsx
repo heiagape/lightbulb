@@ -25,7 +25,7 @@ function Branch() {
 
   // GUI controls for instancing configuration
   const config = useControls("Branch Chandelier", {
-    count: { value: 15, min: 13, max: 20, step: 1, label: "Branch Count" },
+    count: { value: 15, min: 13, max: 20, step: 1, label: "Rows" },
     columns: { value: 7, min: 6, max: 10, step: 1, label: "Columns" },
     tiltFoldY: {
       value: 1.75,
@@ -69,7 +69,7 @@ function Branch() {
     ),
     "Switch to Gold color": button(() => setGlobalMaterialType("Gold color")),
     goldColor: {
-      value: "#d5a945",
+      value: "#ad8934",
       label: "Gold Color",
     },
   });
@@ -335,7 +335,7 @@ function Branch() {
   // Use useMemo to create material once, then update properties via useEffect
   const goldMetalMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: 0xd5a945, // Gold color (default)
+      color: 0xad8934, // Gold color (default)
       metalness: 1,
       roughness: 0.1,
     });

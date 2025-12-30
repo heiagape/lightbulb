@@ -3,7 +3,7 @@ import { useEnvironmentMap } from "./GlassMaterials";
 import * as THREE from "three";
 
 function EnvironmentBackground() {
-  const envMap = useEnvironmentMap("/hdris/colorful_studio_1k.hdr");
+  const envMap = useEnvironmentMap("/hdris/metro_noord_1k.hdr");
 
   const backgroundMaterial = useMemo(() => {
     if (!envMap) return null;

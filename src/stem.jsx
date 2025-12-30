@@ -20,7 +20,7 @@ export function Stem() {
   // Material color control (shared with Branch component via Leva panel)
   const materialControls = useControls("Material", {
     goldColor: {
-      value: "#d5a945",
+      value: "#ad8934",
       label: "Gold Color",
     },
   });
@@ -36,7 +36,7 @@ export function Stem() {
   // Create metal material once, then update properties via useEffect
   const metalMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: 0xd5a945, // Gold color (default)
+      color: 0xad8934, // Gold color (default)
       metalness: 0.7,
       roughness: 0.3,
     });
