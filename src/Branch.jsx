@@ -7,16 +7,16 @@ import { MiracleGlass } from "./GlassMaterials";
 
 // Branch component - creates instanced meshes from multiple branch models
 function Branch() {
-  // Load all 8 branch models
+  // Load all 8 branch models (using "b" versions except for branch 6)
   const branchGLTFs = useLoader(GLTFLoader, [
-    "/assets/branch.011.glb",
-    "/assets/branch.021.glb",
-    "/assets/branch.031.glb",
-    "/assets/branch.041.glb",
-    "/assets/branch.051.glb",
-    "/assets/branch.061.glb",
-    "/assets/branch.071.glb",
-    "/assets/branch.081.glb",
+    "/assets/branch.011_b.glb",
+    "/assets/branch.021_b.glb",
+    "/assets/branch.031_b.glb",
+    "/assets/branch.041_b.glb",
+    "/assets/branch.051_b.glb",
+    "/assets/branch.061.glb", // No "b" version available, keeping original
+    "/assets/branch.071.glb", // Branch 6 - keeping original as requested
+    "/assets/branch.081_b.glb",
   ]);
 
   const instancedMeshRefs = useRef({});
@@ -307,6 +307,20 @@ function Branch() {
     return counts;
   }, [instanceAssignments]);
 
+  // Create black material for meshes with "17363" in their name
+  const blackMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({ color: 0x000000 });
+  }, []);
+
+  // Create subtle gold metal material for non-glass, non-17363 meshes
+  const goldMetalMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: 0xffde8b, // Light yellowish gold color
+      metalness: 0.8,
+      roughness: 0.4,
+    });
+  }, []);
+
   useEffect(() => {
     if (branchMeshData.length === 0) return;
 
@@ -476,6 +490,14 @@ function Branch() {
             meshData.name.toLowerCase().includes("glass") ||
             meshData.name === "MET-59_3D-Model17661";
 
+          // Check if the mesh name contains "17363" - use black material
+          const isBlackMesh = meshData.name.includes("17363");
+          const materialToUse = isGlassMesh
+            ? null
+            : isBlackMesh
+            ? blackMaterial
+            : goldMetalMaterial; // Use gold metal for all other non-glass meshes
+
           return (
             <>
               {/* First layer - original glass mesh */}
@@ -486,11 +508,7 @@ function Branch() {
                     `branch-${branchIndex}-mesh-${meshIndex}`
                   ] = ref;
                 }}
-                args={[
-                  meshData.geometry,
-                  isGlassMesh ? null : meshData.material,
-                  count,
-                ]}
+                args={[meshData.geometry, materialToUse, count]}
               >
                 {isGlassMesh && (
                   <MiracleGlass
@@ -528,6 +546,7 @@ function Branch() {
                     edgeReflectionPower={0.9}
                     edgeReflectionWidth={0.1}
                     shellLayer={3}
+                    roughness={0.1}
                   />
                 </instancedMesh>
               )}

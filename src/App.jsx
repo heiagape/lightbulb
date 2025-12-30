@@ -37,7 +37,7 @@ function Scene() {
       </Suspense>
 
       {/* Reflective Platform */}
-      <ReflectivePlatform size={80} position={[0, -0.7, 0]} receiveShadow />
+      {/* <ReflectivePlatform size={80} position={[0, -0.7, 0]} receiveShadow /> */}
 
       {/* Camera Controls */}
       <OrbitControls
