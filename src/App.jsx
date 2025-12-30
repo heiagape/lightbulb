@@ -78,8 +78,8 @@ function Scene() {
       <OrbitControls
         enableDamping
         dampingFactor={0.05}
-        minDistance={2}
-        maxDistance={10}
+        minDistance={2.5}
+        maxDistance={4}
       />
     </>
   );
@@ -90,7 +90,7 @@ function App() {
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <Canvas
-        camera={{ position: [0, 2, 5], fov: 75 }}
+        camera={{ position: [0, 2, 3], fov: 75 }}
         gl={{ antialias: true }}
         shadows
       >
