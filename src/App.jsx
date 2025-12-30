@@ -1,7 +1,13 @@
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { Suspense, useEffect } from "react";
-import { useThree } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
+import { OrbitControls, Environment } from "@react-three/drei";
+import { ToneMappingMode } from "postprocessing";
+import {
+  EffectComposer,
+  Bloom,
+  ToneMapping,
+} from "@react-three/postprocessing";
+import { useControls } from "leva";
 import Branch from "./Branch";
 import { Stem } from "./stem";
 import EnvironmentBackground from "./EnvironmentBackground";
@@ -12,7 +18,7 @@ import "./style.css";
 // Component to set environment map on the scene for lighting and reflections
 function EnvironmentLighting() {
   const { scene } = useThree();
-  const envMap = useEnvironmentMap("/colorful_studio_4k.hdr");
+  const envMap = useEnvironmentMap("/hdris/metro_noord_1k.hdr");
 
   useEffect(() => {
     if (envMap) {
@@ -29,6 +35,11 @@ function EnvironmentLighting() {
 
 // Scene component containing all 3D elements
 function Scene() {
+  // Post-processing controls
+  const postProcessing = useControls("Post Processing", {
+    enabled: { value: true, label: "Enable Post Processing" },
+  });
+
   return (
     <>
       <ambientLight intensity={0.8} />
@@ -61,16 +72,27 @@ function Scene() {
       {/* Ambient light for overall scene illumination */}
       {/* <ambientLight intensity={100} /> */}
 
-      {/* Plane at origin */}
-      {/* <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[10, 10]} />
-        <meshStandardMaterial color="#333333" />
-      </mesh> */}
+      {/* Lights - warm gold-tinted for chandelier effect */}
+      <ambientLight intensity={0.3} color="#1a1a1a" />
+      <directionalLight position={[5, 5, 5]} intensity={1.5} color="#fff5e6" />
+      <directionalLight
+        position={[-5, 5, -5]}
+        intensity={1.0}
+        color="#ffe4c4"
+      />
+      <pointLight
+        position={[0, 2, 0]}
+        intensity={0.8}
+        color="#ffd700"
+        distance={10}
+      />
 
-      {/* Environment Background */}
-      {/* <Suspense fallback={null}>
-        <EnvironmentBackground />
-      </Suspense> */}
+      {/* Top-left reflection light - invisible but provides reflection basis */}
+      <directionalLight
+        position={[-8, 10, 3]}
+        intensity={2.0}
+        color="#ffffff"
+      />
 
       {/* Models */}
       <Suspense fallback={null}>
@@ -78,16 +100,27 @@ function Scene() {
         <Branch />
       </Suspense>
 
-      {/* Reflective Platform */}
-      {/* <ReflectivePlatform size={80} position={[0, -0.7, 0]} receiveShadow /> */}
-
       {/* Camera Controls */}
       <OrbitControls
         enableDamping
         dampingFactor={0.05}
         minDistance={2}
         maxDistance={4}
+        maxPolarAngle={Math.PI / 2}
       />
+
+      {/* Post Processing - Conditional */}
+      {postProcessing.enabled && (
+        <EffectComposer>
+          <Bloom
+            luminanceThreshold={0.4}
+            luminanceSmoothing={0.9}
+            intensity={0.26}
+            mipmapBlur
+          />
+          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+        </EffectComposer>
+      )}
     </>
   );
 }
@@ -95,10 +128,20 @@ function Scene() {
 // Main App component
 function App() {
   return (
-    <div style={{ width: "100vw", height: "100vh" }}>
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        background: "linear-gradient(to bottom right, #0a0a0c, #15151a)",
+      }}
+    >
       <Canvas
-        camera={{ position: [0, 2, 5], fov: 75 }}
-        gl={{ antialias: true }}
+        camera={{ position: [2, 2, 2], fov: 75 }}
+        gl={{
+          antialias: true,
+          toneMapping: 0,
+          powerPreference: "high-performance",
+        }}
       >
         <Scene />
       </Canvas>

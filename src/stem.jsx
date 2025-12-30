@@ -4,6 +4,8 @@ import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { useMaterialType } from "./materialState";
 import { useControls } from "leva";
+import { TextureLoader } from "three";
+
 
 // Hook to load the Stem.glb model
 export function useStem() {

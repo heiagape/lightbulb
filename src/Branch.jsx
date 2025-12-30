@@ -580,6 +580,8 @@ function Branch() {
                     edgeReflectionPower={0.9}
                     edgeReflectionWidth={0.1}
                     shellLayer={2}
+                    emissive="#FAF9D0"
+                    emissiveIntensity={0.2}
                   />
                 )}
               </instancedMesh>
@@ -605,6 +607,8 @@ function Branch() {
                     edgeReflectionPower={0.9}
                     edgeReflectionWidth={0.1}
                     shellLayer={3}
+                    emissive="#FAF9D0"
+                    emissiveIntensity={0.2}
                     roughness={0.1}
                   />
                 </instancedMesh>
