@@ -17,20 +17,6 @@ function Scene() {
   // Post-processing controls
   const postProcessing = useControls("Post Processing", {
     enabled: { value: true, label: "Enable Post Processing" },
-    bloomIntensity: {
-      value: 0.6,
-      min: 0,
-      max: 2,
-      step: 0.1,
-      label: "Bloom Intensity",
-    },
-    bloomThreshold: {
-      value: 0.4,
-      min: 0,
-      max: 1,
-      step: 0.05,
-      label: "Bloom Threshold",
-    },
   });
 
   return (
@@ -82,9 +68,9 @@ function Scene() {
       {postProcessing.enabled && (
         <EffectComposer>
           <Bloom
-            luminanceThreshold={postProcessing.bloomThreshold}
+            luminanceThreshold={0.4}
             luminanceSmoothing={0.9}
-            intensity={postProcessing.bloomIntensity}
+            intensity={0.26}
             mipmapBlur
           />
           <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
