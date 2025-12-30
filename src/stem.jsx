@@ -1,8 +1,11 @@
 import { useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { TextureLoader } from "three";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
+import { useMaterialType } from "./materialState";
+import { useControls } from "leva";
+import { TextureLoader } from "three";
+
 
 // Hook to load the Stem.glb model
 export function useStem() {
@@ -13,60 +16,105 @@ export function useStem() {
 // Stem component - loads and renders the central stem model
 export function Stem() {
   const gltf = useStem();
+  const materialTypeValue = useMaterialType();
 
-  // Load textures
-  const [baseColor, normalMap, roughnessMap, metallicMap, aoMap] = useLoader(
-    TextureLoader,
-    [
-      "/materials/Poliigon_MetalSteelBrushed_7174_BaseColor.jpg",
-      "/materials/Poliigon_MetalSteelBrushed_7174_Normal.png",
-      "/materials/Poliigon_MetalSteelBrushed_7174_Roughness.jpg",
-      "/materials/Poliigon_MetalSteelBrushed_7174_Metallic.jpg",
-      "/materials/Poliigon_MetalSteelBrushed_7174_AmbientOcclusion.jpg",
-    ]
-  );
+  // Material color control (shared with Branch component via Leva panel)
+  const materialControls = useControls("Material", {
+    goldColor: {
+      value: "#deae4a",
+      label: "Gold Color",
+    },
+  });
 
-  // Configure textures
-  useEffect(() => {
-    [baseColor, normalMap, roughnessMap, metallicMap, aoMap].forEach((t) => {
-      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  // Create materials based on material type
+  const blackMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: 0x000000,
+      roughness: 0.4,
     });
-    baseColor.colorSpace = THREE.SRGBColorSpace;
-  }, [baseColor, normalMap, roughnessMap, metallicMap, aoMap]);
+  }, []);
 
+  // Create metal material once, then update properties via useEffect
   const metalMaterial = useMemo(() => {
-    return new THREE.MeshPhysicalMaterial({
-      map: baseColor,
-      normalMap: normalMap,
-      roughnessMap: roughnessMap,
-      metalnessMap: metallicMap,
-      aoMap: aoMap,
-      color: new THREE.Color("#2a2a2a"), // Dark base with slight visibility
-      metalness: 0.9, // High metalness for reflections
-      roughness: 0.1, // Low roughness for shiny reflective surface
-      envMapIntensity: 3.0, // Strong environment reflections
-      emissive: new THREE.Color("#3d2a0a"), // Subtle warm gold edge glow
-      emissiveIntensity: 0.08,
-      // Glassy/transparent properties
-      transmission: 0.15, // Slight transparency for glassy feel
-      thickness: 0.5, // Thickness for refraction
-      clearcoat: 1.0, // Full clearcoat for glossy layer
-      clearcoatRoughness: 0.05, // Very smooth clearcoat
-      ior: 1.5, // Index of refraction for glass-like effect
-      transparent: true,
-      opacity: 0.92, // Slight transparency
+    return new THREE.MeshStandardMaterial({
+      color: 0xdeae4a, // Gold color (default)
+      metalness: 0.7,
+      roughness: 0.4,
     });
-  }, [baseColor, normalMap, roughnessMap, metallicMap, aoMap]);
+  }, []);
 
+  // Update material properties when material type changes (without recreating the material)
   useEffect(() => {
-    if (gltf.scene) {
-      gltf.scene.traverse((child) => {
-        if (child.isMesh) {
+    // Only update metalMaterial - never touch blackMaterial
+    if (materialTypeValue === "Platinum") {
+      // Update to platinum properties
+      metalMaterial.color.set("#e5e4e2");
+      metalMaterial.roughness = 0.01;
+      metalMaterial.metalness = 1.0;
+      metalMaterial.clearcoat = 0.3;
+      metalMaterial.clearcoatRoughness = 0.1;
+    } else {
+      // Update to gold properties using the color from the GUI
+      metalMaterial.color.set(materialControls.goldColor);
+      metalMaterial.roughness = 0.4;
+      metalMaterial.metalness = 0.7;
+      metalMaterial.clearcoat = 0;
+      metalMaterial.clearcoatRoughness = 0;
+    }
+    metalMaterial.needsUpdate = true;
+
+    // Ensure blackMaterial always stays black (safety check)
+    if (blackMaterial.color.getHex() !== 0x000000) {
+      blackMaterial.color.set(0x000000);
+      blackMaterial.needsUpdate = true;
+    }
+  }, [
+    materialTypeValue,
+    materialControls.goldColor,
+    metalMaterial,
+    blackMaterial,
+  ]);
+
+  // Change material colors based on mesh names
+  // IMPORTANT: Re-run when material type changes to ensure meshes get updated materials
+  useEffect(() => {
+    gltf.scene.traverse((child) => {
+      if (child.isMesh) {
+        // Explicitly check for "17659" - it should ALWAYS get metal material (gold/platinum)
+        const is17659 = child.name.includes("17659");
+        const is17363 = child.name.includes("17363");
+
+        // Debug: log mesh name if it contains "17659"
+        if (is17659) {
+          console.log(
+            `Stem mesh "${child.name}" - ensuring it gets metal material, not black`
+          );
+        }
+
+        // Check if it's a glass mesh
+        const isGlassMesh =
+          child.name.toLowerCase().includes("glass") ||
+          child.name === "MET-59_3D-Model17661";
+
+        // PRIORITY CHECK: Mesh 17659 ALWAYS gets metal material FIRST (regardless of other conditions)
+        if (is17659 && !isGlassMesh) {
+          child.material = metalMaterial;
+        } else if (is17363 && !is17659) {
+          // Only "17363" meshes (NOT "17659") get black material
+          child.material = blackMaterial;
+        } else if (!isGlassMesh) {
+          // All other non-glass meshes get metal material (gold/platinum)
           child.material = metalMaterial;
         }
-      });
-    }
-  }, [gltf, metalMaterial]);
+      }
+    });
+  }, [
+    gltf,
+    blackMaterial,
+    metalMaterial,
+    materialTypeValue,
+    materialControls.goldColor,
+  ]);
 
   return <primitive object={gltf.scene} />;
 }

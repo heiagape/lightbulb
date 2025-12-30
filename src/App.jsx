@@ -1,16 +1,37 @@
-import { Canvas } from "@react-three/fiber";
+import { Suspense, useEffect } from "react";
+import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
+import { ToneMappingMode } from "postprocessing";
 import {
   EffectComposer,
   Bloom,
   ToneMapping,
 } from "@react-three/postprocessing";
-import { ToneMappingMode } from "postprocessing";
-import { Suspense } from "react";
 import { useControls } from "leva";
 import Branch from "./Branch";
 import { Stem } from "./stem";
+import EnvironmentBackground from "./EnvironmentBackground";
+import { ReflectivePlatform } from "./ReflectivePlatform";
+import { useEnvironmentMap } from "./GlassMaterials";
 import "./style.css";
+
+// Component to set environment map on the scene for lighting and reflections
+function EnvironmentLighting() {
+  const { scene } = useThree();
+  const envMap = useEnvironmentMap("/hdris/metro_noord_1k.hdr");
+
+  useEffect(() => {
+    if (envMap) {
+      // Set environment map for lighting and reflections on all materials
+      scene.environment = envMap;
+    }
+    return () => {
+      scene.environment = null;
+    };
+  }, [scene, envMap]);
+
+  return null;
+}
 
 // Scene component containing all 3D elements
 function Scene() {
@@ -21,11 +42,35 @@ function Scene() {
 
   return (
     <>
-      {/* Very Dark Background */}
-      <color attach="background" args={["#050507"]} />
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[5, 5, 5]} intensity={1.2} />
+      <directionalLight position={[-5, 5, -5]} intensity={0.8} />
+      {/* Environment Map Lighting - provides environment lighting for all materials */}
+      <Suspense fallback={null}>
+        <EnvironmentLighting />
+      </Suspense>
 
-      {/* Environment for realistic reflections */}
-      <Environment files="/hdris/metro_noord_1k.hdr" />
+      {/* Black Background */}
+      <color attach="background" args={["#171717"]} />
+
+      {/* Three-Point Lighting Setup */}
+      {/* Key Light - Main light source, positioned at 45 degrees front-right */}
+      <directionalLight
+        position={[5, 5, 5]}
+        intensity={1.5}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
+
+      {/* Fill Light - Softer light, positioned opposite key light to fill shadows */}
+      {/* <directionalLight position={[-4, 3, 4]} intensity={1} color="#ffffff" />/ */}
+
+      {/* Rim/Back Light - Edge light positioned behind the subject */}
+      {/* <directionalLight position={[0, 3, -6]} intensity={14} color="#ffffff" /> */}
+
+      {/* Ambient light for overall scene illumination */}
+      {/* <ambientLight intensity={100} /> */}
 
       {/* Lights - warm gold-tinted for chandelier effect */}
       <ambientLight intensity={0.3} color="#1a1a1a" />

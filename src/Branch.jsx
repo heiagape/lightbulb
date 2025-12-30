@@ -1,70 +1,23 @@
 import { useRef, useEffect, useMemo } from "react";
 import { useLoader, useFrame } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { TextureLoader } from "three";
-import { useControls } from "leva";
+import { useControls, button } from "leva";
 import * as THREE from "three";
 import { MiracleGlass } from "./GlassMaterials";
+import { useMaterialType, setGlobalMaterialType } from "./materialState";
 
 // Branch component - creates instanced meshes from multiple branch models
 function Branch() {
-  // Load textures
-  const [
-    baseColor,
-    normalMap,
-    roughnessMap,
-    metallicMap,
-    aoMap,
-  ] = useLoader(TextureLoader, [
-    "/materials/Poliigon_MetalSteelBrushed_7174_BaseColor.jpg",
-    "/materials/Poliigon_MetalSteelBrushed_7174_Normal.png",
-    "/materials/Poliigon_MetalSteelBrushed_7174_Roughness.jpg",
-    "/materials/Poliigon_MetalSteelBrushed_7174_Metallic.jpg",
-    "/materials/Poliigon_MetalSteelBrushed_7174_AmbientOcclusion.jpg",
-  ]);
-
-  // Configure textures
-  useEffect(() => {
-    [baseColor, normalMap, roughnessMap, metallicMap, aoMap].forEach((t) => {
-      t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    });
-    baseColor.colorSpace = THREE.SRGBColorSpace;
-  }, [baseColor, normalMap, roughnessMap, metallicMap, aoMap]);
-
-  const metalMaterial = useMemo(() => {
-    return new THREE.MeshPhysicalMaterial({
-      map: baseColor,
-      normalMap: normalMap,
-      roughnessMap: roughnessMap,
-      metalnessMap: metallicMap,
-      aoMap: aoMap,
-      color: new THREE.Color("#2a2a2a"), // Dark base with slight visibility
-      metalness: 0.9, // High metalness for reflections
-      roughness: 0.1, // Low roughness for shiny reflective surface
-      envMapIntensity: 3.0, // Strong environment reflections
-      emissive: new THREE.Color("#3d2a0a"), // Subtle warm gold edge glow
-      emissiveIntensity: 0.08,
-      // Glassy/transparent properties
-      transmission: 0.15, // Slight transparency for glassy feel
-      thickness: 0.5, // Thickness for refraction
-      clearcoat: 1.0, // Full clearcoat for glossy layer
-      clearcoatRoughness: 0.05, // Very smooth clearcoat
-      ior: 1.5, // Index of refraction for glass-like effect
-      transparent: true,
-      opacity: 0.92, // Slight transparency
-    });
-  }, [baseColor, normalMap, roughnessMap, metallicMap, aoMap]);
-
-  // Load all 8 branch models
+  // Load all 8 branch models (using "b" versions except for branch 6)
   const branchGLTFs = useLoader(GLTFLoader, [
-    "/assets/branch.011.glb",
-    "/assets/branch.021.glb",
-    "/assets/branch.031.glb",
-    "/assets/branch.041.glb",
-    "/assets/branch.051.glb",
-    "/assets/branch.061.glb",
-    "/assets/branch.071.glb",
-    "/assets/branch.081.glb",
+    "/assets/branch.011_b.glb",
+    "/assets/branch.021_b.glb",
+    "/assets/branch.031_b.glb",
+    "/assets/branch.041_b.glb",
+    "/assets/branch.051_b.glb",
+    "/assets/branch.061.glb", // No "b" version available, keeping original
+    "/assets/branch.071.glb", // Branch 6 - keeping original as requested
+    "/assets/branch.081_b.glb",
   ]);
 
   const instancedMeshRefs = useRef({});
@@ -76,34 +29,47 @@ function Branch() {
     columns: { value: 7, min: 6, max: 10, step: 1, label: "Columns" },
     tiltFoldY: {
       value: 1.75,
-      min: 0,
-      max: 4,
+      min: 1.2,
+      max: 2.2,
       step: 0.05,
       label: "Tilt Fold Y",
     },
     overallFold: {
       value: 0.0,
-      min: -0.2,
+      min: -0.1,
       max: 0.2,
       step: 0.01,
       label: "Overall Fold",
     },
     angleOffset: {
-      value: 1.6,
-      min: -Math.PI,
-      max: Math.PI,
+      value: -1.14,
+      min: -Math.PI / 2,
+      max: Math.PI / 2,
       step: 0.1,
       label: "Rotation Offset",
     },
     distanceOut: {
       value: 0.07,
       min: -0.05,
-      max: 0.2,
+      max: 0.07,
       step: 0.001,
       label: "Distance Out",
     },
     randomSeed: { value: 80, min: 1, max: 100, step: 1, label: "Random Seed" },
     autoRotate: { value: true, label: "Auto Rotate" },
+  });
+
+  // Material type from shared state
+  const materialTypeValue = useMaterialType();
+
+  // Material type control with buttons and color picker
+  const materialControls = useControls("Material", {
+    "Switch to Platinum": button(() => setGlobalMaterialType("Platinum")),
+    "Switch to Gold": button(() => setGlobalMaterialType("Gold")),
+    goldColor: {
+      value: "#deae4a",
+      label: "Gold Color",
+    },
   });
 
   // Hidden config values (not in GUI)
@@ -355,6 +321,56 @@ function Branch() {
     return counts;
   }, [instanceAssignments]);
 
+  // Create black material for meshes with "17363" in their name
+  const blackMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: 0x000000,
+      roughness: 0.4,
+    });
+  }, []);
+
+  // Create metal material (gold or platinum) for non-glass, non-17363 meshes
+  // Use useMemo to create material once, then update properties via useEffect
+  const goldMetalMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: 0xdeae4a, // Gold color (default)
+      metalness: 1,
+      roughness: 0.1,
+    });
+  }, []);
+
+  // Update material properties when material type changes (without recreating the material)
+  useEffect(() => {
+    // Only update goldMetalMaterial - never touch blackMaterial
+    if (materialTypeValue === "Platinum") {
+      // Update to platinum properties
+      goldMetalMaterial.color.set("#e5e4e2");
+      goldMetalMaterial.roughness = 0.01;
+      goldMetalMaterial.metalness = 1.0;
+      goldMetalMaterial.clearcoat = 0.3;
+      goldMetalMaterial.clearcoatRoughness = 0.1;
+    } else {
+      // Update to gold properties using the color from the GUI
+      goldMetalMaterial.color.set(materialControls.goldColor);
+      goldMetalMaterial.roughness = 0.1;
+      goldMetalMaterial.metalness = 1;
+      goldMetalMaterial.clearcoat = 0;
+      goldMetalMaterial.clearcoatRoughness = 0;
+    }
+    goldMetalMaterial.needsUpdate = true;
+
+    // Ensure blackMaterial always stays black (safety check)
+    if (blackMaterial.color.getHex() !== 0x000000) {
+      blackMaterial.color.set(0x000000);
+      blackMaterial.needsUpdate = true;
+    }
+  }, [
+    materialTypeValue,
+    materialControls.goldColor,
+    goldMetalMaterial,
+    blackMaterial,
+  ]);
+
   useEffect(() => {
     if (branchMeshData.length === 0) return;
 
@@ -524,6 +540,23 @@ function Branch() {
             meshData.name.toLowerCase().includes("glass") ||
             meshData.name === "MET-59_3D-Model17661";
 
+          // Check if the mesh name contains "17363" or "17659"
+          const is17659 = meshData.name.includes("17659");
+          const is17363 = meshData.name.includes("17363");
+          let materialToUse = null;
+
+          // PRIORITY CHECK: Mesh 17659 ALWAYS gets metal material FIRST (regardless of other conditions)
+          if (is17659 && !isGlassMesh) {
+            materialToUse = goldMetalMaterial; // Mesh 17659 always gets gold/platinum material
+          } else if (isGlassMesh) {
+            materialToUse = null; // Glass meshes use MiracleGlass material
+          } else if (is17363 && !is17659) {
+            materialToUse = blackMaterial; // ONLY 17363 meshes (NOT "17659") get black material
+          } else {
+            // All other non-glass, non-17363 meshes get gold/platinum material
+            materialToUse = goldMetalMaterial;
+          }
+
           return (
             <>
               {/* First layer - original glass mesh */}
@@ -534,11 +567,7 @@ function Branch() {
                     `branch-${branchIndex}-mesh-${meshIndex}`
                   ] = ref;
                 }}
-                args={[
-                  meshData.geometry,
-                  isGlassMesh ? null : metalMaterial,
-                  count,
-                ]}
+                args={[meshData.geometry, materialToUse, count]}
               >
                 {isGlassMesh && (
                   <MiracleGlass
@@ -580,6 +609,7 @@ function Branch() {
                     shellLayer={3}
                     emissive="#FAF9D0"
                     emissiveIntensity={0.2}
+                    roughness={0.1}
                   />
                 </instancedMesh>
               )}

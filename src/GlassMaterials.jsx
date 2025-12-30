@@ -109,7 +109,7 @@ const miracleGlassConfig = {
   absorptionPower: 0.1,
   reflectionIntensity: 0.01,
   transmissionIntensity: 1.0,
-  chromaticAberration: 0.2,
+  chromaticAberration: 0.05,
   distortion: 0.0,
   distortionScale: 0.0,
   temporalDistortion: 0.0,
