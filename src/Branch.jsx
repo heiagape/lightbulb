@@ -317,7 +317,7 @@ function Branch() {
     return new THREE.MeshStandardMaterial({
       color: 0xffde8b, // Light yellowish gold color
       metalness: 1,
-      roughness: 0.4,
+      roughness: 0.1,
     });
   }, []);
 

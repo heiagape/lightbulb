@@ -14,45 +14,24 @@ function Scene() {
       {/* Black Background */}
       <color attach="background" args={["#000000"]} />
 
-      {/* Lights */}
-      <ambientLight intensity={1.0} />
-      <directionalLight position={[5, 5, 5]} intensity={1.5} />
-      <directionalLight position={[-5, 5, -5]} intensity={1.0} />
-
-      {/* Point light at the center of the chandelier (simulating lightbulb) */}
-      <pointLight
-        position={[0, 0, 0]}
-        intensity={2.0}
-        distance={10}
-        decay={2}
-        color="#ffffff"
-      />
-
-      {/* Spotlight from above to illuminate the chandelier */}
-      <spotLight
-        position={[0, 5, 0]}
-        angle={Math.PI / 3}
-        penumbra={0.5}
+      {/* Three-Point Lighting Setup */}
+      {/* Key Light - Main light source, positioned at 45 degrees front-right */}
+      <directionalLight
+        position={[5, 5, 5]}
         intensity={1.5}
         castShadow
-        color="#ffffff"
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
       />
 
-      {/* Additional point lights for better illumination */}
-      <pointLight
-        position={[3, 2, 3]}
-        intensity={1.0}
-        distance={8}
-        decay={2}
-        color="#ffffff"
-      />
-      <pointLight
-        position={[-3, 2, -3]}
-        intensity={1.0}
-        distance={8}
-        decay={2}
-        color="#ffffff"
-      />
+      {/* Fill Light - Softer light, positioned opposite key light to fill shadows */}
+      <directionalLight position={[-4, 3, 4]} intensity={1} color="#ffffff" />
+
+      {/* Rim/Back Light - Edge light positioned behind the subject */}
+      <directionalLight position={[0, 3, -6]} intensity={14} color="#ffffff" />
+
+      {/* Ambient light for overall scene illumination */}
+      <ambientLight intensity={1} />
 
       {/* Plane at origin */}
       {/* <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -78,7 +57,7 @@ function Scene() {
       <OrbitControls
         enableDamping
         dampingFactor={0.05}
-        minDistance={2.5}
+        minDistance={2}
         maxDistance={4}
       />
     </>
@@ -90,9 +69,8 @@ function App() {
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <Canvas
-        camera={{ position: [0, 2, 3], fov: 75 }}
+        camera={{ position: [0, 2, 5], fov: 75 }}
         gl={{ antialias: true }}
-        shadows
       >
         <Scene />
       </Canvas>

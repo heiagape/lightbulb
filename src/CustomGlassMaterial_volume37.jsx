@@ -1,9 +1,9 @@
-import React, { useMemo, useRef, useEffect } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
-import * as THREE from 'three'
+import React, { useMemo, useRef, useEffect } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
 
 // Hook that creates and returns the glass material
-export function useCustomGlassMaterial({ 
+export function useCustomGlassMaterial({
   envMap = null,
   thicknessMap = null,
   thickness = 0.4,
@@ -13,7 +13,7 @@ export function useCustomGlassMaterial({
   reflectionIntensity = 0.9,
   transmissionIntensity = 0.6,
   chromaticAberration = 0.05,
-  roughness = 0.0,
+  roughness = 0.1,
   samples = 3,
   farPlaneZ = 200,
   isInnerSurface = false,
@@ -52,39 +52,39 @@ export function useCustomGlassMaterial({
   enabledLightNames = null,
   useInstancing = false,
 }) {
-  const materialRef = useRef()
-  const { scene, gl, camera } = useThree()
-  
+  const materialRef = useRef();
+  const { scene, gl, camera } = useThree();
+
   // Ensure normal map has correct encoding
   useEffect(() => {
     if (normalMap) {
-      normalMap.colorSpace = THREE.NoColorSpace
-      normalMap.needsUpdate = true
+      normalMap.colorSpace = THREE.NoColorSpace;
+      normalMap.needsUpdate = true;
     }
-  }, [normalMap])
-  
+  }, [normalMap]);
+
   // Ensure curvature map has correct encoding
   useEffect(() => {
     if (curvatureMap) {
-      curvatureMap.colorSpace = THREE.NoColorSpace
-      curvatureMap.needsUpdate = true
+      curvatureMap.colorSpace = THREE.NoColorSpace;
+      curvatureMap.needsUpdate = true;
     }
-  }, [curvatureMap])
+  }, [curvatureMap]);
 
   useEffect(() => {
     if (positionNormalMap) {
-      positionNormalMap.colorSpace = THREE.NoColorSpace
-      positionNormalMap.needsUpdate = true
+      positionNormalMap.colorSpace = THREE.NoColorSpace;
+      positionNormalMap.needsUpdate = true;
     }
-  }, [positionNormalMap])
-  
+  }, [positionNormalMap]);
+
   // Create render target for transmission sampling WITH DEPTH TEXTURE - HIGHER RESOLUTION
   const transmissionRenderTarget = useMemo(() => {
-    const size = gl.getSize(new THREE.Vector2())
+    const size = gl.getSize(new THREE.Vector2());
     const pixelRatio = window.devicePixelRatio;
-    const width = Math.floor(size.x * pixelRatio)
-    const height = Math.floor(size.y * pixelRatio)
-    
+    const width = Math.floor(size.x * pixelRatio);
+    const height = Math.floor(size.y * pixelRatio);
+
     const target = new THREE.WebGLRenderTarget(width, height, {
       wrapS: THREE.ClampToEdgeWrapping,
       wrapT: THREE.ClampToEdgeWrapping,
@@ -95,25 +95,25 @@ export function useCustomGlassMaterial({
       stencilBuffer: false,
       depthBuffer: true,
       generateMipmaps: true,
-    })
-    
+    });
+
     target.depthTexture = new THREE.DepthTexture(
       width,
       height,
       THREE.UnsignedIntType
-    )
-    
-    return target
-  }, [gl, resolutionMultiplier])
+    );
+
+    return target;
+  }, [gl, resolutionMultiplier]);
 
   // Create depth render target for occlusion detection - HIGHER RESOLUTION
   const depthRenderTarget = useMemo(() => {
-    const size = gl.getSize(new THREE.Vector2())
+    const size = gl.getSize(new THREE.Vector2());
     //const pixelRatio = Math.min(window.devicePixelRatio, 2)
     const pixelRatio = window.devicePixelRatio;
-    const width = Math.floor(size.x * pixelRatio)
-    const height = Math.floor(size.y * pixelRatio)
-    
+    const width = Math.floor(size.x * pixelRatio);
+    const height = Math.floor(size.y * pixelRatio);
+
     return new THREE.WebGLRenderTarget(width, height, {
       wrapS: THREE.ClampToEdgeWrapping,
       wrapT: THREE.ClampToEdgeWrapping,
@@ -123,22 +123,22 @@ export function useCustomGlassMaterial({
       type: THREE.FloatType,
       stencilBuffer: false,
       depthBuffer: true,
-    })
-  }, [gl])
+    });
+  }, [gl]);
 
   // Create background scene with HDR environment
   const backgroundScene = useMemo(() => {
-    const bgScene = new THREE.Scene()
-    
-    const sphereGeometry = new THREE.SphereGeometry(500, 60, 40)
-    sphereGeometry.scale(-1, 1, 1)
-    
+    const bgScene = new THREE.Scene();
+
+    const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
+    sphereGeometry.scale(-1, 1, 1);
+
     const sphereMaterial = new THREE.ShaderMaterial({
       uniforms: {
         envMap: { value: envMap },
         brightnessThreshold: { value: brightnessThreshold },
         brightnessSmoothing: { value: brightnessSmoothing },
-        filterHDR: { value: filterHDR }
+        filterHDR: { value: filterHDR },
       },
       vertexShader: `
         varying vec3 vWorldDirection;
@@ -174,14 +174,14 @@ export function useCustomGlassMaterial({
         }
       `,
       side: THREE.BackSide,
-      depthWrite: false
-    })
-    
-    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
-    bgScene.add(sphere)
-    
-    return bgScene
-  }, [envMap, brightnessThreshold, brightnessSmoothing, filterHDR])
+      depthWrite: false,
+    });
+
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    bgScene.add(sphere);
+
+    return bgScene;
+  }, [envMap, brightnessThreshold, brightnessSmoothing, filterHDR]);
 
   // Create the glass material using the factory function
   const glassMaterial = useMemo(() => {
@@ -223,9 +223,10 @@ vTangent = normalize((effectiveModelMatrix * vec4(tangent.xyz, 0.0)).xyz);
     vScreenPosition = screenPosition;
     vViewPosition = viewPosition.xyz;
     vPosition = position;
-}`
+}`;
 
-const sceneFragmentShader = `
+    const sceneFragmentShader =
+      `
 varying vec2 vUv;
 varying vec3 vNormal;
 varying vec3 vFragPos;
@@ -291,17 +292,33 @@ uniform float specularStrength;
 uniform float shininess;
 
 uniform int numPointLights;
-uniform vec3 pointLightPositions[` + maxLights + `];
-uniform vec3 pointLightColors[` + maxLights + `];
-uniform float pointLightIntensities[` + maxLights + `];
-uniform float pointLightDistances[` + maxLights + `];
+uniform vec3 pointLightPositions[` +
+      maxLights +
+      `];
+uniform vec3 pointLightColors[` +
+      maxLights +
+      `];
+uniform float pointLightIntensities[` +
+      maxLights +
+      `];
+uniform float pointLightDistances[` +
+      maxLights +
+      `];
 
 uniform int numDirectionalLights;
-uniform vec3 directionalLightDirections[` + maxLights + `];
-uniform vec3 directionalLightColors[` + maxLights + `];
-uniform float directionalLightIntensities[` + maxLights + `];
+uniform vec3 directionalLightDirections[` +
+      maxLights +
+      `];
+uniform vec3 directionalLightColors[` +
+      maxLights +
+      `];
+uniform float directionalLightIntensities[` +
+      maxLights +
+      `];
 
-const float farPlaneZ = ` + farPlaneZ + `.0;
+const float farPlaneZ = ` +
+      farPlaneZ +
+      `.0;
 
 vec2 worldToScreen(vec3 worldPos) {
     vec4 clipSpace = projectionMatrix * viewMatrix * vec4(worldPos, 1.0);
@@ -660,7 +677,9 @@ void main() {
         // Calculate specular highlights specifically for edge reflections
         if (enableLighting) {
             // Point lights
-            for (int i = 0; i < ` + maxLights + `; i++) {
+            for (int i = 0; i < ` +
+      maxLights +
+      `; i++) {
                 if (i >= numPointLights) break;
                 
                 vec3 L = pointLightPositions[i] - vFragPos;
@@ -681,7 +700,9 @@ void main() {
             }
             
             // Directional lights
-            for (int i = 0; i < ` + maxLights + `; i++) {
+            for (int i = 0; i < ` +
+      maxLights +
+      `; i++) {
                 if (i >= numDirectionalLights) break;
                 
                 vec3 L = -normalize(directionalLightDirections[i]);
@@ -702,7 +723,9 @@ void main() {
     vec3 specularHighlights = vec3(0.0);
     if (enableLighting) {
         // Point lights
-        for (int i = 0; i < ` + maxLights + `; i++) {
+        for (int i = 0; i < ` +
+      maxLights +
+      `; i++) {
             if (i >= numPointLights) break;
             
             vec3 L = pointLightPositions[i] - vFragPos;
@@ -725,7 +748,9 @@ void main() {
         }
         
         // Directional lights
-        for (int i = 0; i < ` + maxLights + `; i++) {
+        for (int i = 0; i < ` +
+      maxLights +
+      `; i++) {
             if (i >= numDirectionalLights) break;
             
             vec3 L = -normalize(directionalLightDirections[i]);
@@ -747,7 +772,9 @@ void main() {
     // Calculate diffuse-like brightening (for glass, this simulates light passing through)
     vec3 lightBrightening = vec3(0.0);
     // Point lights
-    for (int i = 0; i < ` + maxLights + `; i++) {
+    for (int i = 0; i < ` +
+      maxLights +
+      `; i++) {
         if (i >= numPointLights) break;
         
         vec3 L = pointLightPositions[i] - vFragPos;
@@ -765,7 +792,9 @@ void main() {
     }
     
     // Directional lights
-    for (int i = 0; i < ` + maxLights + `; i++) {
+    for (int i = 0; i < ` +
+      maxLights +
+      `; i++) {
         if (i >= numDirectionalLights) break;
         
         vec3 L = -normalize(directionalLightDirections[i]);
@@ -803,23 +832,25 @@ if (usePositionNormalMap) {
     gl_FragColor = vec4(finalColor, opacity);
 }
 `;
-    
-    const defaultAbsorptionColorObj = new THREE.Color(absorptionColor)
-    
+
+    const defaultAbsorptionColorObj = new THREE.Color(absorptionColor);
+
     const materialDepthWrite = isBackFace ? false : depthWrite;
     const materialDepthTest = depthTest;
     const materialSide = isBackFace ? THREE.BackSide : THREE.FrontSide;
-    
-    const size = gl.getSize(new THREE.Vector2())
-    
+
+    const size = gl.getSize(new THREE.Vector2());
+
     // Initialize empty arrays for lights
-    const emptyVec3Array = new Array(maxLights).fill(null).map(() => new THREE.Vector3())
-    const emptyFloatArray = new Array(maxLights).fill(0)
-    
+    const emptyVec3Array = new Array(maxLights)
+      .fill(null)
+      .map(() => new THREE.Vector3());
+    const emptyFloatArray = new Array(maxLights).fill(0);
+
     const material = new THREE.ShaderMaterial({
       vertexShader: sceneVertexShader,
       fragmentShader: sceneFragmentShader,
-      defines: useInstancing ? { USE_INSTANCING: '' } : {},
+      defines: useInstancing ? { USE_INSTANCING: "" } : {},
       uniforms: {
         transmissionSamplerMap: { value: null },
         sceneDepth: { value: null },
@@ -834,7 +865,13 @@ if (usePositionNormalMap) {
         viewMatrix: { value: camera.matrixWorldInverse },
         projectionMatrix: { value: camera.projectionMatrix },
         absorptionPower: { value: absorptionPower },
-        absorptionColor: { value: [defaultAbsorptionColorObj.r, defaultAbsorptionColorObj.g, defaultAbsorptionColorObj.b] },
+        absorptionColor: {
+          value: [
+            defaultAbsorptionColorObj.r,
+            defaultAbsorptionColorObj.g,
+            defaultAbsorptionColorObj.b,
+          ],
+        },
         colorIntensity: { value: colorIntensity },
         chromaticAberration: { value: chromaticAberration },
         roughness: { value: roughness },
@@ -883,368 +920,17 @@ if (usePositionNormalMap) {
       depthWrite: materialDepthWrite,
       depthTest: materialDepthTest,
       renderOrder: renderOrder,
-      toneMapped: false
-    })
-    
-    return material
-  }, [farPlaneZ, absorptionColor, gl, camera, renderOrder, depthWrite, brightnessThreshold, brightnessSmoothing, filterHDR, edgeReflectionIntensity, edgeReflectionPower, edgeReflectionWidth, normalMap, useNormalMap, normalScale, curvatureMap, useCurvatureMap, curvatureScale, enableLighting, specularStrength, shininess, maxLights, useInstancing])
+      toneMapped: false,
+    });
 
-  glassMaterial.userData = { shellLayer, isBackFace }
-
-  // Update material uniforms when props change
-  useEffect(() => {
-    if (glassMaterial && glassMaterial.uniforms) {
-      if (glassMaterial.uniforms.absorptionPower) glassMaterial.uniforms.absorptionPower.value = absorptionPower
-      if (glassMaterial.uniforms.colorIntensity) glassMaterial.uniforms.colorIntensity.value = colorIntensity
-      if (glassMaterial.uniforms.chromaticAberration) glassMaterial.uniforms.chromaticAberration.value = chromaticAberration
-      if (glassMaterial.uniforms.roughness) glassMaterial.uniforms.roughness.value = roughness
-      if (glassMaterial.uniforms.samples) glassMaterial.uniforms.samples.value = samples
-      if (glassMaterial.uniforms.brightReflectionIntensity) glassMaterial.uniforms.brightReflectionIntensity.value = brightReflectionIntensity
-      if (glassMaterial.uniforms.specularHighlightIntensity) glassMaterial.uniforms.specularHighlightIntensity.value = specularHighlightIntensity
-      if (glassMaterial.uniforms.enableReflections) glassMaterial.uniforms.enableReflections.value = enableReflections
-      if (glassMaterial.uniforms.envIntensity) glassMaterial.uniforms.envIntensity.value = envIntensity
-      if (glassMaterial.uniforms.opacity) glassMaterial.uniforms.opacity.value = opacity
-      if (glassMaterial.uniforms.ior) glassMaterial.uniforms.ior.value = ior
-      if (glassMaterial.uniforms.thickness) glassMaterial.uniforms.thickness.value = thickness
-      if (glassMaterial.uniforms.thicknessMap) glassMaterial.uniforms.thicknessMap.value = thicknessMap
-      if (glassMaterial.uniforms.hasThicknessMap) glassMaterial.uniforms.hasThicknessMap.value = thicknessMap !== null
-      if (glassMaterial.uniforms.reflectionIntensity) glassMaterial.uniforms.reflectionIntensity.value = reflectionIntensity
-      if (glassMaterial.uniforms.transmissionIntensity) glassMaterial.uniforms.transmissionIntensity.value = transmissionIntensity
-      if (glassMaterial.uniforms.brightnessThreshold) glassMaterial.uniforms.brightnessThreshold.value = brightnessThreshold
-      if (glassMaterial.uniforms.brightnessSmoothing) glassMaterial.uniforms.brightnessSmoothing.value = brightnessSmoothing
-      if (glassMaterial.uniforms.filterHDR) glassMaterial.uniforms.filterHDR.value = filterHDR
-      if (glassMaterial.uniforms.cameraNear) glassMaterial.uniforms.cameraNear.value = camera.near
-      if (glassMaterial.uniforms.cameraFar) glassMaterial.uniforms.cameraFar.value = camera.far
-      if (glassMaterial.uniforms.cameraPosition) glassMaterial.uniforms.cameraPosition.value.copy(camera.position)
-      if (glassMaterial.uniforms.edgeReflectionIntensity) glassMaterial.uniforms.edgeReflectionIntensity.value = edgeReflectionIntensity
-      if (glassMaterial.uniforms.edgeReflectionPower) glassMaterial.uniforms.edgeReflectionPower.value = edgeReflectionPower
-      if (glassMaterial.uniforms.edgeReflectionWidth) glassMaterial.uniforms.edgeReflectionWidth.value = edgeReflectionWidth
-      if (glassMaterial.uniforms.normalMap) glassMaterial.uniforms.normalMap.value = normalMap
-      if (glassMaterial.uniforms.useNormalMap) glassMaterial.uniforms.useNormalMap.value = useNormalMap
-      if (glassMaterial.uniforms.normalScale) glassMaterial.uniforms.normalScale.value = normalScale
-      if (glassMaterial.uniforms.curvatureMap) glassMaterial.uniforms.curvatureMap.value = curvatureMap
-      if (glassMaterial.uniforms.useCurvatureMap) glassMaterial.uniforms.useCurvatureMap.value = useCurvatureMap
-      if (glassMaterial.uniforms.curvatureScale) glassMaterial.uniforms.curvatureScale.value = curvatureScale
-      if (glassMaterial.uniforms.enableLighting) glassMaterial.uniforms.enableLighting.value = enableLighting
-      if (glassMaterial.uniforms.specularStrength) glassMaterial.uniforms.specularStrength.value = specularStrength
-      if (glassMaterial.uniforms.shininess) glassMaterial.uniforms.shininess.value = shininess
-      if (glassMaterial.uniforms.positionNormalMap) glassMaterial.uniforms.positionNormalMap.value = positionNormalMap
-      if (glassMaterial.uniforms.usePositionNormalMap) glassMaterial.uniforms.usePositionNormalMap.value = usePositionNormalMap
-      if (glassMaterial.uniforms.positionFresnelPower) glassMaterial.uniforms.positionFresnelPower.value = positionFresnelPower
-      if (glassMaterial.uniforms.positionFresnelIntensity) glassMaterial.uniforms.positionFresnelIntensity.value = positionFresnelIntensity
-      const colorObj = new THREE.Color(absorptionColor)
-      if (glassMaterial.uniforms.absorptionColor) {
-        glassMaterial.uniforms.absorptionColor.value = [colorObj.r, colorObj.g, colorObj.b]
-      }
-    }
-  }, [glassMaterial, absorptionPower, colorIntensity, reflectionIntensity, transmissionIntensity, chromaticAberration, roughness, samples, absorptionColor, brightReflectionIntensity, specularHighlightIntensity, enableReflections, envIntensity, opacity, ior, thickness, thicknessMap, brightnessThreshold, brightnessSmoothing, filterHDR, edgeReflectionIntensity, edgeReflectionPower, edgeReflectionWidth, camera, normalMap, useNormalMap, normalScale, curvatureMap, useCurvatureMap, curvatureScale, enableLighting, specularStrength, shininess, positionNormalMap, usePositionNormalMap, positionFresnelPower, positionFresnelIntensity ])
-
-  // Update environment map and background scene
-  useEffect(() => {
-    if (glassMaterial && glassMaterial.uniforms && glassMaterial.uniforms.radiance && envMap) {
-      glassMaterial.uniforms.radiance.value = envMap
-    }
-    
-    if (backgroundScene && envMap) {
-      backgroundScene.traverse((obj) => {
-        if (obj.isMesh && obj.material && obj.material.uniforms) {
-          if (obj.material.uniforms.envMap) {
-            obj.material.uniforms.envMap.value = envMap
-          }
-          if (obj.material.uniforms.brightnessThreshold) {
-            obj.material.uniforms.brightnessThreshold.value = brightnessThreshold
-          }
-          if (obj.material.uniforms.brightnessSmoothing) {
-            obj.material.uniforms.brightnessSmoothing.value = brightnessSmoothing
-          }
-          if (obj.material.uniforms.filterHDR) {
-            obj.material.uniforms.filterHDR.value = filterHDR
-          }
-        }
-      })
-    }
-  }, [glassMaterial, envMap, backgroundScene, brightnessThreshold, brightnessSmoothing, filterHDR])
-
-  const TRANSMISSION_LAYER = 1;
-  const NORMAL_LAYER = 0;
-
-  useFrame((state) => {
-    if (glassMaterial && glassMaterial.uniforms) {
-      // Update camera matrices and position
-      if (glassMaterial.uniforms.viewMatrix) {
-        glassMaterial.uniforms.viewMatrix.value.copy(camera.matrixWorldInverse)
-      }
-      if (glassMaterial.uniforms.projectionMatrix) {
-        glassMaterial.uniforms.projectionMatrix.value.copy(camera.projectionMatrix)
-      }
-      if (glassMaterial.uniforms.cameraPosition) {
-        glassMaterial.uniforms.cameraPosition.value.copy(camera.position)
-      }
-      
-      // Update light uniforms from scene
-      if (enableLighting) {
-        const pointLights = []
-        const directionalLights = []
-        
-        // Helper function to check if light should be included
-        const shouldIncludeLight = (light) => {
-          if (!enabledLightNames || enabledLightNames.length === 0) {
-            return true // Include all lights if no filter specified
-          }
-          return enabledLightNames.includes(light.name)
-        }
-        
-        scene.traverse((obj) => {
-          if (obj.isPointLight && pointLights.length < maxLights && shouldIncludeLight(obj)) {
-            pointLights.push(obj)
-          } else if (obj.isDirectionalLight && directionalLights.length < maxLights && shouldIncludeLight(obj)) {
-            directionalLights.push(obj)
-          }
-        })
-
-        // Update point lights
-        const pointPositions = new Array(maxLights).fill(null).map(() => new THREE.Vector3())
-        const pointColors = new Array(maxLights).fill(null).map(() => new THREE.Vector3())
-        const pointIntensities = new Array(maxLights).fill(0)
-        const pointDistances = new Array(maxLights).fill(0)
-        
-        pointLights.forEach((light, i) => {
-          pointPositions[i].copy(light.position)
-          pointColors[i].set(light.color.r, light.color.g, light.color.b)
-          pointIntensities[i] = light.intensity
-          pointDistances[i] = light.distance
-        })
-        
-        glassMaterial.uniforms.numPointLights.value = pointLights.length
-        glassMaterial.uniforms.pointLightPositions.value = pointPositions
-        glassMaterial.uniforms.pointLightColors.value = pointColors
-        glassMaterial.uniforms.pointLightIntensities.value = pointIntensities
-        glassMaterial.uniforms.pointLightDistances.value = pointDistances
-        
-        // Update directional lights
-        const dirDirections = new Array(maxLights).fill(null).map(() => new THREE.Vector3())
-        const dirColors = new Array(maxLights).fill(null).map(() => new THREE.Vector3())
-        const dirIntensities = new Array(maxLights).fill(0)
-        
-        directionalLights.forEach((light, i) => {
-          const lightWorldPos = new THREE.Vector3()
-          light.getWorldPosition(lightWorldPos)
-          
-          // Get the target's world position
-          const targetWorldPos = new THREE.Vector3()
-          light.target.getWorldPosition(targetWorldPos)
-          
-          // Calculate direction from light to target
-          dirDirections[i].subVectors(targetWorldPos, lightWorldPos).normalize()
-          
-          dirColors[i].set(light.color.r, light.color.g, light.color.b)
-          dirIntensities[i] = light.intensity
-        })
-        
-        glassMaterial.uniforms.numDirectionalLights.value = directionalLights.length
-        glassMaterial.uniforms.directionalLightDirections.value = dirDirections
-        glassMaterial.uniforms.directionalLightColors.value = dirColors
-        glassMaterial.uniforms.directionalLightIntensities.value = dirIntensities
-
-      }
-      
-      const currentRenderTarget = gl.getRenderTarget()
-      const originalBackground = scene.background
-      const originalEnvironment = scene.environment
-      const originalCameraLayers = camera.layers.mask
-      const excludedObjects = [];
-
-      
-      const glassMeshesByLayer = new Map()
-      scene.traverse((obj) => {
-        if (obj.isMesh && obj.material && obj.material.userData && obj.material.userData.shellLayer !== undefined) {
-          const layer = obj.material.userData.shellLayer
-          const isBack = obj.material.userData.isBackFace || false
-          const key = `${layer}_${isBack ? 'back' : 'front'}`
-          
-          if (!glassMeshesByLayer.has(key)) {
-            glassMeshesByLayer.set(key, [])
-          }
-          glassMeshesByLayer.get(key).push(obj)
-        }
-
-        if (obj.userData.excludeFromGlass) {
-          excludedObjects.push(obj);
-          obj.visible = false;
-        }
-      })
-
-      
-      const allKeys = Array.from(glassMeshesByLayer.keys())
-      const layers = [...new Set(allKeys.map(k => parseInt(k.split('_')[0])))].sort((a, b) => a - b)
-
-      
-      const currentKey = `${shellLayer}_${isBackFace ? 'back' : 'front'}`
-      if (!glassMeshesByLayer.has(currentKey)) 
-        return
-      
-      camera.layers.set(NORMAL_LAYER)
-      camera.layers.enable(TRANSMISSION_LAYER)
-      
-      const currentLayerIndex = layers.indexOf(shellLayer)
-      
-      const meshesToHide = []
-      
-      if (isBackFace) {
-        for (let i = 0; i <= currentLayerIndex; i++) {
-          const frontKey = `${layers[i]}_front`
-          const backKey = `${layers[i]}_back`
-          
-          if (glassMeshesByLayer.has(frontKey)) {
-            meshesToHide.push(...glassMeshesByLayer.get(frontKey))
-          }
-          
-          if (i < currentLayerIndex && glassMeshesByLayer.has(backKey)) {
-            meshesToHide.push(...glassMeshesByLayer.get(backKey))
-          }
-        }
-      } else {
-        for (let i = 0; i <= currentLayerIndex; i++) {
-          const frontKey = `${layers[i]}_front`
-          const backKey = `${layers[i]}_back`
-          
-          if (glassMeshesByLayer.has(frontKey)) {
-            meshesToHide.push(...glassMeshesByLayer.get(frontKey))
-          }
-          if (glassMeshesByLayer.has(backKey)) {
-            meshesToHide.push(...glassMeshesByLayer.get(backKey))
-          }
-        }
-      }
-      
-      meshesToHide.forEach(mesh => { mesh.visible = false })
-      
-      gl.setRenderTarget(transmissionRenderTarget)
-      gl.clear()
-
-      gl.render(backgroundScene, camera)
-      gl.render(scene, camera)
-
-      
-      const currentMeshes = glassMeshesByLayer.get(currentKey)
-      if (currentMeshes) {
-        currentMeshes.forEach(mesh => { mesh.visible = true })
-      }
-
-      excludedObjects.forEach(obj => {
-        obj.visible = true;
-      });
-      
-      glassMaterial.uniforms.transmissionSamplerMap.value = transmissionRenderTarget.texture
-      glassMaterial.uniforms.sceneDepth.value = transmissionRenderTarget.depthTexture
-      
-      glassMeshesByLayer.forEach(meshes => {
-        meshes.forEach(mesh => { mesh.visible = true })
-      })
-      
-      camera.layers.mask = originalCameraLayers
-      scene.background = originalBackground
-      scene.environment = originalEnvironment
-      gl.setRenderTarget(currentRenderTarget)
-    }
-  })
-
-  useEffect(() => {
-    return () => {
-      transmissionRenderTarget.dispose()
-      if (transmissionRenderTarget.depthTexture) {
-        transmissionRenderTarget.depthTexture.dispose()
-      }
-      depthRenderTarget.dispose()
-      if (backgroundScene) {
-        backgroundScene.traverse((obj) => {
-          if (obj.geometry) obj.geometry.dispose()
-          if (obj.material) obj.material.dispose()
-        })
-      }
-    }
-  }, [transmissionRenderTarget, depthRenderTarget, backgroundScene])
-
-  return glassMaterial
-}
-
-// React component
-const CustomGlassMaterial = React.forwardRef(({ 
-  meshRef,
-  envMap = null,
-  thicknessMap = null,
-  thickness = 0.04,
-  absorptionColor = 0xd47d5a,
-  absorptionPower = 0.1,
-  colorIntensity = 1.0,
-  reflectionIntensity = 0.9,
-  transmissionIntensity = 0.6,
-  chromaticAberration = 0.05,
-  roughness = 0.0,
-  samples = 3,
-  farPlaneZ = 200,
-  isInnerSurface = false,
-  depthWrite = true,
-  depthTest = true,
-  brightReflectionIntensity = 0.3,
-  specularHighlightIntensity = 0.5,
-  enableReflections = false,
-  envIntensity = 2.0,
-  opacity = 1.0,
-  ior = 1.5,
-  renderOrder = 0,
-  shellLayer = 0,
-  isBackFace = false,
-  brightnessThreshold = 0.5,
-  brightnessSmoothing = 0.2,
-  filterHDR = true,
-  edgeReflectionIntensity = 3.0,
-  edgeReflectionPower = 3.0,
-  edgeReflectionWidth = 0.3,
-  normalMap = null,
-  useNormalMap = false,
-  normalScale = 1.0,
-  resolutionMultiplier = 2.0,
-  curvatureMap = null,
-  useCurvatureMap = false,
-  curvatureScale = 1.0,
-  enableLighting = true,
-  specularStrength = 1.0,
-  shininess = 64.0,
-  maxLights = 3,
-  positionNormalMap = null,
-  usePositionNormalMap = false,
-  positionFresnelPower = 1.0,
-  positionFresnelIntensity = 1.0,
-  enabledLightNames = null,
-  useInstancing = false,
-  ...props 
-}, ref) => {
-  const material = useCustomGlassMaterial({
-    envMap,
-    thicknessMap,
-    thickness,
-    absorptionColor,
-    absorptionPower,
-    colorIntensity,
-    reflectionIntensity,
-    transmissionIntensity,
-    chromaticAberration,
-    roughness,
-    samples,
+    return material;
+  }, [
     farPlaneZ,
-    isInnerSurface,
-    depthWrite,
-    depthTest,
-    brightReflectionIntensity,
-    specularHighlightIntensity,
-    enableReflections,
-    envIntensity,
-    opacity,
-    ior,
+    absorptionColor,
+    gl,
+    camera,
     renderOrder,
-    shellLayer,
-    isBackFace,
+    depthWrite,
     brightnessThreshold,
     brightnessSmoothing,
     filterHDR,
@@ -1254,7 +940,6 @@ const CustomGlassMaterial = React.forwardRef(({
     normalMap,
     useNormalMap,
     normalScale,
-    resolutionMultiplier,
     curvatureMap,
     useCurvatureMap,
     curvatureScale,
@@ -1262,27 +947,539 @@ const CustomGlassMaterial = React.forwardRef(({
     specularStrength,
     shininess,
     maxLights,
+    useInstancing,
+  ]);
+
+  glassMaterial.userData = { shellLayer, isBackFace };
+
+  // Update material uniforms when props change
+  useEffect(() => {
+    if (glassMaterial && glassMaterial.uniforms) {
+      if (glassMaterial.uniforms.absorptionPower)
+        glassMaterial.uniforms.absorptionPower.value = absorptionPower;
+      if (glassMaterial.uniforms.colorIntensity)
+        glassMaterial.uniforms.colorIntensity.value = colorIntensity;
+      if (glassMaterial.uniforms.chromaticAberration)
+        glassMaterial.uniforms.chromaticAberration.value = chromaticAberration;
+      if (glassMaterial.uniforms.roughness)
+        glassMaterial.uniforms.roughness.value = roughness;
+      if (glassMaterial.uniforms.samples)
+        glassMaterial.uniforms.samples.value = samples;
+      if (glassMaterial.uniforms.brightReflectionIntensity)
+        glassMaterial.uniforms.brightReflectionIntensity.value =
+          brightReflectionIntensity;
+      if (glassMaterial.uniforms.specularHighlightIntensity)
+        glassMaterial.uniforms.specularHighlightIntensity.value =
+          specularHighlightIntensity;
+      if (glassMaterial.uniforms.enableReflections)
+        glassMaterial.uniforms.enableReflections.value = enableReflections;
+      if (glassMaterial.uniforms.envIntensity)
+        glassMaterial.uniforms.envIntensity.value = envIntensity;
+      if (glassMaterial.uniforms.opacity)
+        glassMaterial.uniforms.opacity.value = opacity;
+      if (glassMaterial.uniforms.ior) glassMaterial.uniforms.ior.value = ior;
+      if (glassMaterial.uniforms.thickness)
+        glassMaterial.uniforms.thickness.value = thickness;
+      if (glassMaterial.uniforms.thicknessMap)
+        glassMaterial.uniforms.thicknessMap.value = thicknessMap;
+      if (glassMaterial.uniforms.hasThicknessMap)
+        glassMaterial.uniforms.hasThicknessMap.value = thicknessMap !== null;
+      if (glassMaterial.uniforms.reflectionIntensity)
+        glassMaterial.uniforms.reflectionIntensity.value = reflectionIntensity;
+      if (glassMaterial.uniforms.transmissionIntensity)
+        glassMaterial.uniforms.transmissionIntensity.value =
+          transmissionIntensity;
+      if (glassMaterial.uniforms.brightnessThreshold)
+        glassMaterial.uniforms.brightnessThreshold.value = brightnessThreshold;
+      if (glassMaterial.uniforms.brightnessSmoothing)
+        glassMaterial.uniforms.brightnessSmoothing.value = brightnessSmoothing;
+      if (glassMaterial.uniforms.filterHDR)
+        glassMaterial.uniforms.filterHDR.value = filterHDR;
+      if (glassMaterial.uniforms.cameraNear)
+        glassMaterial.uniforms.cameraNear.value = camera.near;
+      if (glassMaterial.uniforms.cameraFar)
+        glassMaterial.uniforms.cameraFar.value = camera.far;
+      if (glassMaterial.uniforms.cameraPosition)
+        glassMaterial.uniforms.cameraPosition.value.copy(camera.position);
+      if (glassMaterial.uniforms.edgeReflectionIntensity)
+        glassMaterial.uniforms.edgeReflectionIntensity.value =
+          edgeReflectionIntensity;
+      if (glassMaterial.uniforms.edgeReflectionPower)
+        glassMaterial.uniforms.edgeReflectionPower.value = edgeReflectionPower;
+      if (glassMaterial.uniforms.edgeReflectionWidth)
+        glassMaterial.uniforms.edgeReflectionWidth.value = edgeReflectionWidth;
+      if (glassMaterial.uniforms.normalMap)
+        glassMaterial.uniforms.normalMap.value = normalMap;
+      if (glassMaterial.uniforms.useNormalMap)
+        glassMaterial.uniforms.useNormalMap.value = useNormalMap;
+      if (glassMaterial.uniforms.normalScale)
+        glassMaterial.uniforms.normalScale.value = normalScale;
+      if (glassMaterial.uniforms.curvatureMap)
+        glassMaterial.uniforms.curvatureMap.value = curvatureMap;
+      if (glassMaterial.uniforms.useCurvatureMap)
+        glassMaterial.uniforms.useCurvatureMap.value = useCurvatureMap;
+      if (glassMaterial.uniforms.curvatureScale)
+        glassMaterial.uniforms.curvatureScale.value = curvatureScale;
+      if (glassMaterial.uniforms.enableLighting)
+        glassMaterial.uniforms.enableLighting.value = enableLighting;
+      if (glassMaterial.uniforms.specularStrength)
+        glassMaterial.uniforms.specularStrength.value = specularStrength;
+      if (glassMaterial.uniforms.shininess)
+        glassMaterial.uniforms.shininess.value = shininess;
+      if (glassMaterial.uniforms.positionNormalMap)
+        glassMaterial.uniforms.positionNormalMap.value = positionNormalMap;
+      if (glassMaterial.uniforms.usePositionNormalMap)
+        glassMaterial.uniforms.usePositionNormalMap.value =
+          usePositionNormalMap;
+      if (glassMaterial.uniforms.positionFresnelPower)
+        glassMaterial.uniforms.positionFresnelPower.value =
+          positionFresnelPower;
+      if (glassMaterial.uniforms.positionFresnelIntensity)
+        glassMaterial.uniforms.positionFresnelIntensity.value =
+          positionFresnelIntensity;
+      const colorObj = new THREE.Color(absorptionColor);
+      if (glassMaterial.uniforms.absorptionColor) {
+        glassMaterial.uniforms.absorptionColor.value = [
+          colorObj.r,
+          colorObj.g,
+          colorObj.b,
+        ];
+      }
+    }
+  }, [
+    glassMaterial,
+    absorptionPower,
+    colorIntensity,
+    reflectionIntensity,
+    transmissionIntensity,
+    chromaticAberration,
+    roughness,
+    samples,
+    absorptionColor,
+    brightReflectionIntensity,
+    specularHighlightIntensity,
+    enableReflections,
+    envIntensity,
+    opacity,
+    ior,
+    thickness,
+    thicknessMap,
+    brightnessThreshold,
+    brightnessSmoothing,
+    filterHDR,
+    edgeReflectionIntensity,
+    edgeReflectionPower,
+    edgeReflectionWidth,
+    camera,
+    normalMap,
+    useNormalMap,
+    normalScale,
+    curvatureMap,
+    useCurvatureMap,
+    curvatureScale,
+    enableLighting,
+    specularStrength,
+    shininess,
     positionNormalMap,
     usePositionNormalMap,
     positionFresnelPower,
     positionFresnelIntensity,
-    enabledLightNames,
-    useInstancing,
-  })
+  ]);
+
+  // Update environment map and background scene
+  useEffect(() => {
+    if (
+      glassMaterial &&
+      glassMaterial.uniforms &&
+      glassMaterial.uniforms.radiance &&
+      envMap
+    ) {
+      glassMaterial.uniforms.radiance.value = envMap;
+    }
+
+    if (backgroundScene && envMap) {
+      backgroundScene.traverse((obj) => {
+        if (obj.isMesh && obj.material && obj.material.uniforms) {
+          if (obj.material.uniforms.envMap) {
+            obj.material.uniforms.envMap.value = envMap;
+          }
+          if (obj.material.uniforms.brightnessThreshold) {
+            obj.material.uniforms.brightnessThreshold.value =
+              brightnessThreshold;
+          }
+          if (obj.material.uniforms.brightnessSmoothing) {
+            obj.material.uniforms.brightnessSmoothing.value =
+              brightnessSmoothing;
+          }
+          if (obj.material.uniforms.filterHDR) {
+            obj.material.uniforms.filterHDR.value = filterHDR;
+          }
+        }
+      });
+    }
+  }, [
+    glassMaterial,
+    envMap,
+    backgroundScene,
+    brightnessThreshold,
+    brightnessSmoothing,
+    filterHDR,
+  ]);
+
+  const TRANSMISSION_LAYER = 1;
+  const NORMAL_LAYER = 0;
+
+  useFrame((state) => {
+    if (glassMaterial && glassMaterial.uniforms) {
+      // Update camera matrices and position
+      if (glassMaterial.uniforms.viewMatrix) {
+        glassMaterial.uniforms.viewMatrix.value.copy(camera.matrixWorldInverse);
+      }
+      if (glassMaterial.uniforms.projectionMatrix) {
+        glassMaterial.uniforms.projectionMatrix.value.copy(
+          camera.projectionMatrix
+        );
+      }
+      if (glassMaterial.uniforms.cameraPosition) {
+        glassMaterial.uniforms.cameraPosition.value.copy(camera.position);
+      }
+
+      // Update light uniforms from scene
+      if (enableLighting) {
+        const pointLights = [];
+        const directionalLights = [];
+
+        // Helper function to check if light should be included
+        const shouldIncludeLight = (light) => {
+          if (!enabledLightNames || enabledLightNames.length === 0) {
+            return true; // Include all lights if no filter specified
+          }
+          return enabledLightNames.includes(light.name);
+        };
+
+        scene.traverse((obj) => {
+          if (
+            obj.isPointLight &&
+            pointLights.length < maxLights &&
+            shouldIncludeLight(obj)
+          ) {
+            pointLights.push(obj);
+          } else if (
+            obj.isDirectionalLight &&
+            directionalLights.length < maxLights &&
+            shouldIncludeLight(obj)
+          ) {
+            directionalLights.push(obj);
+          }
+        });
+
+        // Update point lights
+        const pointPositions = new Array(maxLights)
+          .fill(null)
+          .map(() => new THREE.Vector3());
+        const pointColors = new Array(maxLights)
+          .fill(null)
+          .map(() => new THREE.Vector3());
+        const pointIntensities = new Array(maxLights).fill(0);
+        const pointDistances = new Array(maxLights).fill(0);
+
+        pointLights.forEach((light, i) => {
+          pointPositions[i].copy(light.position);
+          pointColors[i].set(light.color.r, light.color.g, light.color.b);
+          pointIntensities[i] = light.intensity;
+          pointDistances[i] = light.distance;
+        });
+
+        glassMaterial.uniforms.numPointLights.value = pointLights.length;
+        glassMaterial.uniforms.pointLightPositions.value = pointPositions;
+        glassMaterial.uniforms.pointLightColors.value = pointColors;
+        glassMaterial.uniforms.pointLightIntensities.value = pointIntensities;
+        glassMaterial.uniforms.pointLightDistances.value = pointDistances;
+
+        // Update directional lights
+        const dirDirections = new Array(maxLights)
+          .fill(null)
+          .map(() => new THREE.Vector3());
+        const dirColors = new Array(maxLights)
+          .fill(null)
+          .map(() => new THREE.Vector3());
+        const dirIntensities = new Array(maxLights).fill(0);
+
+        directionalLights.forEach((light, i) => {
+          const lightWorldPos = new THREE.Vector3();
+          light.getWorldPosition(lightWorldPos);
+
+          // Get the target's world position
+          const targetWorldPos = new THREE.Vector3();
+          light.target.getWorldPosition(targetWorldPos);
+
+          // Calculate direction from light to target
+          dirDirections[i]
+            .subVectors(targetWorldPos, lightWorldPos)
+            .normalize();
+
+          dirColors[i].set(light.color.r, light.color.g, light.color.b);
+          dirIntensities[i] = light.intensity;
+        });
+
+        glassMaterial.uniforms.numDirectionalLights.value =
+          directionalLights.length;
+        glassMaterial.uniforms.directionalLightDirections.value = dirDirections;
+        glassMaterial.uniforms.directionalLightColors.value = dirColors;
+        glassMaterial.uniforms.directionalLightIntensities.value =
+          dirIntensities;
+      }
+
+      const currentRenderTarget = gl.getRenderTarget();
+      const originalBackground = scene.background;
+      const originalEnvironment = scene.environment;
+      const originalCameraLayers = camera.layers.mask;
+      const excludedObjects = [];
+
+      const glassMeshesByLayer = new Map();
+      scene.traverse((obj) => {
+        if (
+          obj.isMesh &&
+          obj.material &&
+          obj.material.userData &&
+          obj.material.userData.shellLayer !== undefined
+        ) {
+          const layer = obj.material.userData.shellLayer;
+          const isBack = obj.material.userData.isBackFace || false;
+          const key = `${layer}_${isBack ? "back" : "front"}`;
+
+          if (!glassMeshesByLayer.has(key)) {
+            glassMeshesByLayer.set(key, []);
+          }
+          glassMeshesByLayer.get(key).push(obj);
+        }
+
+        if (obj.userData.excludeFromGlass) {
+          excludedObjects.push(obj);
+          obj.visible = false;
+        }
+      });
+
+      const allKeys = Array.from(glassMeshesByLayer.keys());
+      const layers = [
+        ...new Set(allKeys.map((k) => parseInt(k.split("_")[0]))),
+      ].sort((a, b) => a - b);
+
+      const currentKey = `${shellLayer}_${isBackFace ? "back" : "front"}`;
+      if (!glassMeshesByLayer.has(currentKey)) return;
+
+      camera.layers.set(NORMAL_LAYER);
+      camera.layers.enable(TRANSMISSION_LAYER);
+
+      const currentLayerIndex = layers.indexOf(shellLayer);
+
+      const meshesToHide = [];
+
+      if (isBackFace) {
+        for (let i = 0; i <= currentLayerIndex; i++) {
+          const frontKey = `${layers[i]}_front`;
+          const backKey = `${layers[i]}_back`;
+
+          if (glassMeshesByLayer.has(frontKey)) {
+            meshesToHide.push(...glassMeshesByLayer.get(frontKey));
+          }
+
+          if (i < currentLayerIndex && glassMeshesByLayer.has(backKey)) {
+            meshesToHide.push(...glassMeshesByLayer.get(backKey));
+          }
+        }
+      } else {
+        for (let i = 0; i <= currentLayerIndex; i++) {
+          const frontKey = `${layers[i]}_front`;
+          const backKey = `${layers[i]}_back`;
+
+          if (glassMeshesByLayer.has(frontKey)) {
+            meshesToHide.push(...glassMeshesByLayer.get(frontKey));
+          }
+          if (glassMeshesByLayer.has(backKey)) {
+            meshesToHide.push(...glassMeshesByLayer.get(backKey));
+          }
+        }
+      }
+
+      meshesToHide.forEach((mesh) => {
+        mesh.visible = false;
+      });
+
+      gl.setRenderTarget(transmissionRenderTarget);
+      gl.clear();
+
+      gl.render(backgroundScene, camera);
+      gl.render(scene, camera);
+
+      const currentMeshes = glassMeshesByLayer.get(currentKey);
+      if (currentMeshes) {
+        currentMeshes.forEach((mesh) => {
+          mesh.visible = true;
+        });
+      }
+
+      excludedObjects.forEach((obj) => {
+        obj.visible = true;
+      });
+
+      glassMaterial.uniforms.transmissionSamplerMap.value =
+        transmissionRenderTarget.texture;
+      glassMaterial.uniforms.sceneDepth.value =
+        transmissionRenderTarget.depthTexture;
+
+      glassMeshesByLayer.forEach((meshes) => {
+        meshes.forEach((mesh) => {
+          mesh.visible = true;
+        });
+      });
+
+      camera.layers.mask = originalCameraLayers;
+      scene.background = originalBackground;
+      scene.environment = originalEnvironment;
+      gl.setRenderTarget(currentRenderTarget);
+    }
+  });
 
   useEffect(() => {
-    if (ref) {
-      if (typeof ref === 'function') {
-        ref(material)
-      } else {
-        ref.current = material
+    return () => {
+      transmissionRenderTarget.dispose();
+      if (transmissionRenderTarget.depthTexture) {
+        transmissionRenderTarget.depthTexture.dispose();
       }
-    }
-  }, [material, ref])
+      depthRenderTarget.dispose();
+      if (backgroundScene) {
+        backgroundScene.traverse((obj) => {
+          if (obj.geometry) obj.geometry.dispose();
+          if (obj.material) obj.material.dispose();
+        });
+      }
+    };
+  }, [transmissionRenderTarget, depthRenderTarget, backgroundScene]);
 
-  return <primitive object={material} attach="material" {...props} />
-})
+  return glassMaterial;
+}
 
-CustomGlassMaterial.displayName = 'CustomGlassMaterial'
+// React component
+const CustomGlassMaterial = React.forwardRef(
+  (
+    {
+      meshRef,
+      envMap = null,
+      thicknessMap = null,
+      thickness = 0.04,
+      absorptionColor = 0xd47d5a,
+      absorptionPower = 0.1,
+      colorIntensity = 1.0,
+      reflectionIntensity = 0.9,
+      transmissionIntensity = 0.6,
+      chromaticAberration = 0.05,
+      roughness = 0.0,
+      samples = 3,
+      farPlaneZ = 200,
+      isInnerSurface = false,
+      depthWrite = true,
+      depthTest = true,
+      brightReflectionIntensity = 0.3,
+      specularHighlightIntensity = 0.5,
+      enableReflections = false,
+      envIntensity = 2.0,
+      opacity = 1.0,
+      ior = 1.5,
+      renderOrder = 0,
+      shellLayer = 0,
+      isBackFace = false,
+      brightnessThreshold = 0.5,
+      brightnessSmoothing = 0.2,
+      filterHDR = true,
+      edgeReflectionIntensity = 3.0,
+      edgeReflectionPower = 3.0,
+      edgeReflectionWidth = 0.3,
+      normalMap = null,
+      useNormalMap = false,
+      normalScale = 1.0,
+      resolutionMultiplier = 2.0,
+      curvatureMap = null,
+      useCurvatureMap = false,
+      curvatureScale = 1.0,
+      enableLighting = true,
+      specularStrength = 1.0,
+      shininess = 64.0,
+      maxLights = 3,
+      positionNormalMap = null,
+      usePositionNormalMap = false,
+      positionFresnelPower = 1.0,
+      positionFresnelIntensity = 1.0,
+      enabledLightNames = null,
+      useInstancing = false,
+      ...props
+    },
+    ref
+  ) => {
+    const material = useCustomGlassMaterial({
+      envMap,
+      thicknessMap,
+      thickness,
+      absorptionColor,
+      absorptionPower,
+      colorIntensity,
+      reflectionIntensity,
+      transmissionIntensity,
+      chromaticAberration,
+      roughness,
+      samples,
+      farPlaneZ,
+      isInnerSurface,
+      depthWrite,
+      depthTest,
+      brightReflectionIntensity,
+      specularHighlightIntensity,
+      enableReflections,
+      envIntensity,
+      opacity,
+      ior,
+      renderOrder,
+      shellLayer,
+      isBackFace,
+      brightnessThreshold,
+      brightnessSmoothing,
+      filterHDR,
+      edgeReflectionIntensity,
+      edgeReflectionPower,
+      edgeReflectionWidth,
+      normalMap,
+      useNormalMap,
+      normalScale,
+      resolutionMultiplier,
+      curvatureMap,
+      useCurvatureMap,
+      curvatureScale,
+      enableLighting,
+      specularStrength,
+      shininess,
+      maxLights,
+      positionNormalMap,
+      usePositionNormalMap,
+      positionFresnelPower,
+      positionFresnelIntensity,
+      enabledLightNames,
+      useInstancing,
+    });
 
-export default CustomGlassMaterial
+    useEffect(() => {
+      if (ref) {
+        if (typeof ref === "function") {
+          ref(material);
+        } else {
+          ref.current = material;
+        }
+      }
+    }, [material, ref]);
+
+    return <primitive object={material} attach="material" {...props} />;
+  }
+);
+
+CustomGlassMaterial.displayName = "CustomGlassMaterial";
+
+export default CustomGlassMaterial;
