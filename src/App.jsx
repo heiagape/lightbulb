@@ -1,6 +1,6 @@
 import { Suspense, useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
+import { OrbitControls, Environment, Loader } from "@react-three/drei";
 import { ToneMappingMode } from "postprocessing";
 import * as THREE from "three";
 import {
@@ -124,8 +124,21 @@ function App() {
         width: "100vw",
         height: "100vh",
         background: "linear-gradient(to bottom right, #0a0a0c, #15151a)",
+        position: "relative",
       }}
     >
+      <img
+        src="/images/LOBMEYR Logo_auf schwarz.jpg"
+        alt="LOBMEYR"
+        style={{
+          position: "absolute",
+          top: "40px",
+          left: "40px",
+          width: "180px",
+          zIndex: 10,
+          pointerEvents: "none",
+        }}
+      />
       <Canvas
         camera={{ position: [2, 2, 2], fov: 75 }}
         gl={{
@@ -136,6 +149,33 @@ function App() {
       >
         <Scene />
       </Canvas>
+      <Loader
+        containerStyles={{
+          background: "linear-gradient(to bottom right, #0a0a0c, #15151a)",
+          zIndex: 9999,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+        }}
+        innerStyles={{
+          width: "300px",
+          height: "2px",
+          backgroundColor: "#333",
+        }}
+        barStyles={{
+          backgroundColor: "#ad8934",
+          height: "2px",
+        }}
+        dataStyles={{
+          color: "#ad8934",
+          fontFamily: "inherit",
+          fontSize: "12px",
+          fontWeight: "normal",
+          marginTop: "20px",
+        }}
+      />
     </div>
   );
 }
