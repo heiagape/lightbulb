@@ -128,7 +128,7 @@ function App() {
       }}
     >
       <img
-        src="/images/LOBMEYR Logo_auf schwarz.jpg"
+        src="/images/lob.svg"
         alt="LOBMEYR"
         style={{
           position: "absolute",
