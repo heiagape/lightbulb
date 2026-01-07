@@ -102,8 +102,8 @@ function Branch() {
 
     // Long branches are branch07 (index 6) and branch08 (index 7)
     const longBranchIndices = [6, 7];
-    // Regular branches are indices 0-5
-    const regularBranchIndices = [0, 1, 2, 3, 4, 5];
+    // Regular branches are indices 0-4 (branch06 at index 5 is excluded)
+    const regularBranchIndices = [0, 1, 2, 3, 4];
 
     // Helper function to get position from global index
     const getPosition = (globalIndex) => {
