@@ -341,6 +341,18 @@ function Branch() {
     });
   }, []);
 
+  // Standard glass material for specific meshes (glass02 and glass06)
+  const standardGlassMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: 0xff0000,
+      metalness: 0,
+      roughness: 0.0,
+      opacity: 1.0,
+      emissive: new THREE.Color(0xffec8e),
+      emissiveIntensity: 100.0,
+    });
+  }, []);
+
   // Update material properties when material type changes (without recreating the material)
   useEffect(() => {
     // Only update goldMetalMaterial - never touch blackMaterial
@@ -542,6 +554,14 @@ function Branch() {
             meshData.name.toLowerCase().includes("glass") ||
             meshData.name === "MET-59_3D-Model17661";
 
+          // Specific glass meshes that should use a standard MeshStandardMaterial instead
+          const isGlass02 = meshData.name.toLowerCase().includes("glass001");
+          const isGlass06 = meshData.name.toLowerCase().includes("glass06");
+          const isStandardGlassMesh = isGlass02 || isGlass06;
+
+          // Glass meshes that still use the custom MiracleGlass material
+          const isMiracleGlassMesh = isGlassMesh && !isStandardGlassMesh;
+
           // Check if the mesh name contains specific numbers
           const is17659 = meshData.name.includes("17659");
           const is17363 = meshData.name.includes("17363");
@@ -566,8 +586,10 @@ function Branch() {
           // PRIORITY CHECK: Mesh 17659 ALWAYS gets metal material FIRST (regardless of other conditions)
           if (is17659 && !isGlassMesh) {
             materialToUse = goldMetalMaterial; // Mesh 17659 always gets gold/platinum material
-          } else if (isGlassMesh) {
-            materialToUse = null; // Glass meshes use MiracleGlass material
+          } else if (isMiracleGlassMesh) {
+            materialToUse = null; // Glass meshes (except glass02/glass06) use MiracleGlass material
+          } else if (isStandardGlassMesh) {
+            materialToUse = standardGlassMaterial; // glass02 and glass06 use standard MeshStandardMaterial
           } else if (isBlackMaterialMesh && !is17659) {
             materialToUse = blackMaterial; // Meshes with 17363, 17662, 17467, 17468, 17364, 17838, 17839, or 17762 (NOT "17659") get black material
           } else {
@@ -587,7 +609,7 @@ function Branch() {
                 }}
                 args={[meshData.geometry, materialToUse, count]}
               >
-                {isGlassMesh && (
+                {isMiracleGlassMesh && (
                   <MiracleGlass
                     ior={1.5}
                     absorptionColor={"#ffffff"}
@@ -605,7 +627,7 @@ function Branch() {
               </instancedMesh>
 
               {/* Second layer - duplicate glass mesh with different material */}
-              {isGlassMesh && (
+              {isMiracleGlassMesh && (
                 <instancedMesh
                   key={`branch-${branchIndex}-mesh-${meshIndex}-layer2-${totalInstances}-${config.randomSeed}`}
                   ref={(ref) => {
