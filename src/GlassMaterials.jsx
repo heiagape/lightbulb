@@ -200,6 +200,21 @@ export const MiracleGlass = ({ ref: materialRef, ...props }) => {
     />
   );
 };
+
+// Variant of MiracleGlass for ultra-thin shells (e.g. transparent bulbs)
+export const ThinMiracleGlass = ({ ref: materialRef, ...props }) => {
+  const envMap = useEnvironmentMap("/hdris/colorful_studio_1k.hdr");
+
+  return (
+    <CustomGlassMaterial
+      ref={materialRef}
+      envMap={envMap}
+      {...miracleGlassConfig}
+      thickness={0.0}
+      {...props}
+    />
+  );
+};
 /**
  * Reusable glass material component for La Vie Est Belle bottles
  */

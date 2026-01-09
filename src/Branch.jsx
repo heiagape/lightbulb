@@ -3,7 +3,7 @@ import { useLoader, useFrame } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { useControls, button } from "leva";
 import * as THREE from "three";
-import { MiracleGlass } from "./GlassMaterials";
+import { MiracleGlass, ThinMiracleGlass } from "./GlassMaterials";
 import { useMaterialType, setGlobalMaterialType } from "./materialState";
 
 // Branch component - creates instanced meshes from multiple branch models
@@ -353,6 +353,16 @@ function Branch() {
     });
   }, []);
 
+  const transparentMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      metalness: 0,
+      roughness: 0.0,
+      opacity: 0.05,
+      transparent: true,
+    });
+  }, []);
+
   // Update material properties when material type changes (without recreating the material)
   useEffect(() => {
     // Only update goldMetalMaterial - never touch blackMaterial
@@ -555,12 +565,20 @@ function Branch() {
             meshData.name === "MET-59_3D-Model17661";
 
           // Specific glass meshes that should use a standard MeshStandardMaterial instead
-          const isGlass02 = meshData.name.toLowerCase().includes("glass001");
-          const isGlass06 = meshData.name.toLowerCase().includes("glass06");
+          const meshNameLower = meshData.name.toLowerCase();
+          const isGlass02 = meshNameLower.includes("lightbulb_em_b") || meshNameLower.includes("lighbulb_em_b");
+          const isGlass06 = meshNameLower.includes("lightbulb_em_c001") || meshNameLower.includes("lighbulb_em_c001");
           const isStandardGlassMesh = isGlass02 || isGlass06;
 
+          const transparent02 = meshData.name.toLowerCase().includes("glass001");
+          const transparent06 = meshData.name.toLowerCase().includes("glass06");
+          // const transparent02 = null;
+          // const transparent06 = null;
+          const isTransparentMesh = transparent02 || transparent06;
+
           // Glass meshes that still use the custom MiracleGlass material
-          const isMiracleGlassMesh = isGlassMesh && !isStandardGlassMesh;
+          // Exclude transparent meshes and standard glass meshes from miracle glass
+          const isMiracleGlassMesh = isGlassMesh && !isStandardGlassMesh && !isTransparentMesh;
 
           // Check if the mesh name contains specific numbers
           const is17659 = meshData.name.includes("17659");
@@ -583,13 +601,17 @@ function Branch() {
             is17762;
           let materialToUse = null;
 
-          // PRIORITY CHECK: Mesh 17659 ALWAYS gets metal material FIRST (regardless of other conditions)
-          if (is17659 && !isGlassMesh) {
-            materialToUse = goldMetalMaterial; // Mesh 17659 always gets gold/platinum material
-          } else if (isMiracleGlassMesh) {
-            materialToUse = null; // Glass meshes (except glass02/glass06) use MiracleGlass material
-          } else if (isStandardGlassMesh) {
+          // PRIORITY CHECK: Standard glass meshes (glass02 and glass06) get their material FIRST
+          if (isStandardGlassMesh) {
             materialToUse = standardGlassMaterial; // glass02 and glass06 use standard MeshStandardMaterial
+            console.log(`Applying standardGlassMaterial to mesh: "${meshData.name}"`);
+          } else if (!isGlassMesh) {
+            materialToUse = goldMetalMaterial; // Non-glass meshes get gold/platinum material
+          } else if (isTransparentMesh) {
+            //materialToUse = transparentMaterial;
+            materialToUse = null;
+          } else if (isMiracleGlassMesh) {
+            materialToUse = null; // Glass meshes (except glass02/glass06/transparent) use MiracleGlass material
           } else if (isBlackMaterialMesh && !is17659) {
             materialToUse = blackMaterial; // Meshes with 17363, 17662, 17467, 17468, 17364, 17838, 17839, or 17762 (NOT "17659") get black material
           } else {
@@ -615,6 +637,21 @@ function Branch() {
                     absorptionColor={"#ffffff"}
                     isBackFace={false}
                     thickness={0.01}
+                    envIntensity={1.5}
+                    edgeReflectionIntensity={0.5}
+                    edgeReflectionPower={0.9}
+                    edgeReflectionWidth={0.1}
+                    shellLayer={2}
+                    emissive="#FAF9D0"
+                    emissiveIntensity={0.2}
+                  />
+                )}
+                {isTransparentMesh && (
+                  <ThinMiracleGlass
+                    ior={1.5}
+                    absorptionColor={"#ffffff"}
+                    isBackFace={false}
+                    thickness={0.001}
                     envIntensity={1.5}
                     edgeReflectionIntensity={0.5}
                     edgeReflectionPower={0.9}
