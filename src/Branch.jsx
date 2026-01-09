@@ -566,11 +566,17 @@ function Branch() {
 
           // Specific glass meshes that should use a standard MeshStandardMaterial instead
           const meshNameLower = meshData.name.toLowerCase();
-          const isGlass02 = meshNameLower.includes("lightbulb_em_b") || meshNameLower.includes("lighbulb_em_b");
-          const isGlass06 = meshNameLower.includes("lightbulb_em_c001") || meshNameLower.includes("lighbulb_em_c001");
+          const isGlass02 =
+            meshNameLower.includes("lightbulb_em_b") ||
+            meshNameLower.includes("lighbulb_em_b");
+          const isGlass06 =
+            meshNameLower.includes("lightbulb_em_c001") ||
+            meshNameLower.includes("lighbulb_em_c001");
           const isStandardGlassMesh = isGlass02 || isGlass06;
 
-          const transparent02 = meshData.name.toLowerCase().includes("glass001");
+          const transparent02 = meshData.name
+            .toLowerCase()
+            .includes("glass001");
           const transparent06 = meshData.name.toLowerCase().includes("glass06");
           // const transparent02 = null;
           // const transparent06 = null;
@@ -578,7 +584,8 @@ function Branch() {
 
           // Glass meshes that still use the custom MiracleGlass material
           // Exclude transparent meshes and standard glass meshes from miracle glass
-          const isMiracleGlassMesh = isGlassMesh && !isStandardGlassMesh && !isTransparentMesh;
+          const isMiracleGlassMesh =
+            isGlassMesh && !isStandardGlassMesh && !isTransparentMesh;
 
           // Check if the mesh name contains specific numbers
           const is17659 = meshData.name.includes("17659");
@@ -604,7 +611,9 @@ function Branch() {
           // PRIORITY CHECK: Standard glass meshes (glass02 and glass06) get their material FIRST
           if (isStandardGlassMesh) {
             materialToUse = standardGlassMaterial; // glass02 and glass06 use standard MeshStandardMaterial
-            console.log(`Applying standardGlassMaterial to mesh: "${meshData.name}"`);
+            console.log(
+              `Applying standardGlassMaterial to mesh: "${meshData.name}"`
+            );
           } else if (!isGlassMesh) {
             materialToUse = goldMetalMaterial; // Non-glass meshes get gold/platinum material
           } else if (isTransparentMesh) {
@@ -679,7 +688,7 @@ function Branch() {
                     absorptionColor={"#ffffff"}
                     isBackFace={true}
                     thickness={0.01}
-                    envIntensity={1.2}
+                    envIntensity={1.0}
                     edgeReflectionIntensity={0.5}
                     edgeReflectionPower={0.9}
                     edgeReflectionWidth={0.1}
