@@ -281,10 +281,17 @@ function Branch() {
             ? child.material[0]
             : child.material;
 
+          // Compute geometry center for local scaling
+          child.geometry.computeBoundingBox();
+          const boundingBox = child.geometry.boundingBox;
+          const geometryCenter = new THREE.Vector3();
+          boundingBox.getCenter(geometryCenter);
+
           meshes.push({
             geometry: child.geometry,
             material: material,
             name: child.name,
+            center: geometryCenter.clone(), // Store center for local scaling
           });
 
           // Enhanced logging to debug material issues
@@ -512,11 +519,12 @@ function Branch() {
           .multiply(overallFoldQuaternion);
         dummy.quaternion.copy(baseQuaternion);
 
-        dummy.scale.set(1, 1, 1);
-        dummy.updateMatrix();
-
         // Get mesh index for this branch type (branchIndex already retrieved above)
         const meshIndex = branchInstanceIndices[branchIndex];
+
+        // Store base position and quaternion for reuse
+        const basePosition = dummy.position.clone();
+        const baseQuaternionValue = dummy.quaternion.clone();
 
         // Set the matrix for the appropriate branch type's instanced mesh
         // This includes both layer 1 and layer 2 (duplicate glass meshes)
@@ -525,6 +533,59 @@ function Branch() {
           if (key.startsWith(meshKey)) {
             const instancedMesh = instancedMeshRefs.current[key];
             if (instancedMesh) {
+              // Extract mesh index from key to check if this is glass02 or transparent02
+              // Key format: "branch-X-mesh-Y" or "branch-X-mesh-Y-layer2"
+              const keyMatch = key.match(/branch-\d+-mesh-(\d+)/);
+              const keyMeshIndex = keyMatch ? parseInt(keyMatch[1]) : -1;
+
+              // Reset position and rotation to base values
+              dummy.position.copy(basePosition);
+              dummy.quaternion.copy(baseQuaternionValue);
+
+              // Check if this mesh is glass02 or transparent02
+              let scaleValue = 1.0;
+              let geometryCenter = null;
+              if (
+                keyMeshIndex >= 0 &&
+                branchMeshData[branchIndex] &&
+                branchMeshData[branchIndex][keyMeshIndex]
+              ) {
+                const meshData = branchMeshData[branchIndex][keyMeshIndex];
+                const meshNameLower = meshData.name.toLowerCase();
+                const isGlass02 =
+                  meshNameLower.includes("lightbulb_em_b") ||
+                  meshNameLower.includes("lighbulb_em_b");
+                const transparent02 = meshNameLower.includes("glass001");
+
+                if (isGlass02 || transparent02) {
+                  scaleValue = 1.2;
+                }
+
+                // Get geometry center if available
+                if (meshData.center) {
+                  geometryCenter = meshData.center;
+                }
+              }
+
+              // Adjust position to compensate for scaling around geometry center
+              // This ensures the mesh scales locally without moving in global space
+              if (geometryCenter && scaleValue !== 1.0) {
+                // Transform geometry center to world space using current rotation
+                const worldCenter = geometryCenter
+                  .clone()
+                  .applyQuaternion(baseQuaternionValue);
+                // Adjust position to compensate for scale change
+                // When scaling from 1.0 to scaleValue, the center moves by center * (scaleValue - 1.0)
+                // To keep it in place, we need to move the object by -center * (scaleValue - 1.0)
+                const positionOffset = worldCenter.multiplyScalar(
+                  1.0 - scaleValue
+                );
+                dummy.position.add(positionOffset);
+              }
+
+              // Apply scale in local space (scale around local origin)
+              dummy.scale.set(scaleValue, scaleValue, scaleValue);
+              dummy.updateMatrix();
               instancedMesh.setMatrixAt(meshIndex, dummy.matrix);
             }
           }
