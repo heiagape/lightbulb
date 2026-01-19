@@ -720,6 +720,21 @@ function Branch() {
                   opacity={0.05}
                   transparent={true}
                   />
+                  // <meshPhysicalMaterial
+                  //   color={"#ffffff"}
+                  //   // Transmission glass: keep opacity at 1 and drive the look via transmission/attenuation
+                  //   transparent={false}
+                  //   opacity={1.0}
+                  //   transmission={1.0}
+                  //   ior={1.5}
+                  //   // Make depth visible: larger thickness + attenuation tint
+                  //   thickness={0.1}
+                  //   attenuationDistance={0.2}
+                  //   attenuationColor={"#e4f3ff"}
+                  //   dispersion={1.0}
+                  //   roughness={0.02}
+                  //   side={THREE.DoubleSide}
+                  // />
                 )}
                 {isTransparentMesh && (
                   <ThinMiracleGlass
