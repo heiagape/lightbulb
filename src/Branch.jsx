@@ -759,7 +759,7 @@ function Branch() {
               </instancedMesh>
 
               {/* Second layer - duplicate glass mesh with different material */}
-              {isMiracleGlassMesh && (
+              {/* {isMiracleGlassMesh && (
                 <instancedMesh
                   key={`branch-${branchIndex}-mesh-${meshIndex}-layer2-${totalInstances}-${config.randomSeed}`}
                   ref={(ref) => {
@@ -784,7 +784,7 @@ function Branch() {
                     roughness={0.1}
                   />
                 </instancedMesh>
-              )}
+              )} */}
             </>
           );
         });

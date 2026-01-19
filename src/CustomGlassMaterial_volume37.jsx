@@ -111,8 +111,8 @@ export function useCustomGlassMaterial({
   // Create depth render target for occlusion detection - HIGHER RESOLUTION
   const depthRenderTarget = useMemo(() => {
     const size = gl.getSize(new THREE.Vector2());
-    //const pixelRatio = Math.min(window.devicePixelRatio, 2)
-    const pixelRatio = window.devicePixelRatio;
+    const pixelRatio = Math.min(window.devicePixelRatio, 2)
+    // const pixelRatio = window.devicePixelRatio;
     const width = Math.floor(size.x * pixelRatio);
     const height = Math.floor(size.y * pixelRatio);
 
