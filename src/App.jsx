@@ -97,7 +97,7 @@ function Scene() {
       />
 
       {/* Post Processing - Always render composer to prevent accumulation issues */}
-      <EffectComposer>
+      {/* <EffectComposer>
         {postProcessing.enabled && (
           <>
             <Bloom
@@ -109,7 +109,7 @@ function Scene() {
             <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
           </>
         )}
-      </EffectComposer>
+      </EffectComposer> */}
     </>
   );
 }
