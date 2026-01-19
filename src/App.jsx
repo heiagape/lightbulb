@@ -1,6 +1,6 @@
 import { Suspense, useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment, Loader } from "@react-three/drei";
+import { OrbitControls, Loader } from "@react-three/drei";
 import { ToneMappingMode } from "postprocessing";
 import * as THREE from "three";
 import {
@@ -11,8 +11,6 @@ import {
 import { useControls } from "leva";
 import Branch from "./Branch";
 import { Stem } from "./stem";
-import EnvironmentBackground from "./EnvironmentBackground";
-import { ReflectivePlatform } from "./ReflectivePlatform";
 import { useEnvironmentMap } from "./GlassMaterials";
 import "./style.css";
 
