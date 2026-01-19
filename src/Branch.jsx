@@ -737,18 +737,23 @@ function Branch() {
                   // />
                 )}
                 {isTransparentMesh && (
-                  <ThinMiracleGlass
-                    ior={1.5}
-                    absorptionColor={"#ffffff"}
-                    isBackFace={false}
-                    thickness={0.001}
-                    envIntensity={1.5}
-                    edgeReflectionIntensity={0.5}
-                    edgeReflectionPower={0.9}
-                    edgeReflectionWidth={0.1}
-                    shellLayer={2}
-                    emissive="#FAF9D0"
-                    emissiveIntensity={0.2}
+                  // <ThinMiracleGlass
+                  //   ior={1.5}
+                  //   absorptionColor={"#ffffff"}
+                  //   isBackFace={false}
+                  //   thickness={0.001}
+                  //   envIntensity={1.5}
+                  //   edgeReflectionIntensity={0.5}
+                  //   edgeReflectionPower={0.9}
+                  //   edgeReflectionWidth={0.1}
+                  //   shellLayer={2}
+                  //   emissive="#FAF9D0"
+                  //   emissiveIntensity={0.2}
+                  // />
+                  <meshStandardMaterial
+                  color={"#ffffff"}
+                  opacity={0.05}
+                  transparent={true}
                   />
                 )}
               </instancedMesh>
