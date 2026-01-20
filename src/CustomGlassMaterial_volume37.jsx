@@ -1157,9 +1157,228 @@ if (usePositionNormalMap) {
   const TRANSMISSION_LAYER = 1;
   const NORMAL_LAYER = 0;
 
+  // useFrame((state) => {
+  //   if (glassMaterial && glassMaterial.uniforms) {
+  //     // Update camera matrices and position
+  //     if (glassMaterial.uniforms.viewMatrix) {
+  //       glassMaterial.uniforms.viewMatrix.value.copy(camera.matrixWorldInverse);
+  //     }
+  //     if (glassMaterial.uniforms.projectionMatrix) {
+  //       glassMaterial.uniforms.projectionMatrix.value.copy(
+  //         camera.projectionMatrix
+  //       );
+  //     }
+  //     if (glassMaterial.uniforms.cameraPosition) {
+  //       glassMaterial.uniforms.cameraPosition.value.copy(camera.position);
+  //     }
+
+  //     // Update light uniforms from scene
+  //     if (enableLighting) {
+  //       const pointLights = [];
+  //       const directionalLights = [];
+
+  //       // Helper function to check if light should be included
+  //       const shouldIncludeLight = (light) => {
+  //         if (!enabledLightNames || enabledLightNames.length === 0) {
+  //           return true; // Include all lights if no filter specified
+  //         }
+  //         return enabledLightNames.includes(light.name);
+  //       };
+
+  //       scene.traverse((obj) => {
+  //         if (
+  //           obj.isPointLight &&
+  //           pointLights.length < maxLights &&
+  //           shouldIncludeLight(obj)
+  //         ) {
+  //           pointLights.push(obj);
+  //         } else if (
+  //           obj.isDirectionalLight &&
+  //           directionalLights.length < maxLights &&
+  //           shouldIncludeLight(obj)
+  //         ) {
+  //           directionalLights.push(obj);
+  //         }
+  //       });
+
+  //       // Update point lights
+  //       const pointPositions = new Array(maxLights)
+  //         .fill(null)
+  //         .map(() => new THREE.Vector3());
+  //       const pointColors = new Array(maxLights)
+  //         .fill(null)
+  //         .map(() => new THREE.Vector3());
+  //       const pointIntensities = new Array(maxLights).fill(0);
+  //       const pointDistances = new Array(maxLights).fill(0);
+
+  //       pointLights.forEach((light, i) => {
+  //         pointPositions[i].copy(light.position);
+  //         pointColors[i].set(light.color.r, light.color.g, light.color.b);
+  //         pointIntensities[i] = light.intensity;
+  //         pointDistances[i] = light.distance;
+  //       });
+
+  //       glassMaterial.uniforms.numPointLights.value = pointLights.length;
+  //       glassMaterial.uniforms.pointLightPositions.value = pointPositions;
+  //       glassMaterial.uniforms.pointLightColors.value = pointColors;
+  //       glassMaterial.uniforms.pointLightIntensities.value = pointIntensities;
+  //       glassMaterial.uniforms.pointLightDistances.value = pointDistances;
+
+  //       // Update directional lights
+  //       const dirDirections = new Array(maxLights)
+  //         .fill(null)
+  //         .map(() => new THREE.Vector3());
+  //       const dirColors = new Array(maxLights)
+  //         .fill(null)
+  //         .map(() => new THREE.Vector3());
+  //       const dirIntensities = new Array(maxLights).fill(0);
+
+  //       directionalLights.forEach((light, i) => {
+  //         const lightWorldPos = new THREE.Vector3();
+  //         light.getWorldPosition(lightWorldPos);
+
+  //         // Get the target's world position
+  //         const targetWorldPos = new THREE.Vector3();
+  //         light.target.getWorldPosition(targetWorldPos);
+
+  //         // Calculate direction from light to target
+  //         dirDirections[i]
+  //           .subVectors(targetWorldPos, lightWorldPos)
+  //           .normalize();
+
+  //         dirColors[i].set(light.color.r, light.color.g, light.color.b);
+  //         dirIntensities[i] = light.intensity;
+  //       });
+
+  //       glassMaterial.uniforms.numDirectionalLights.value =
+  //         directionalLights.length;
+  //       glassMaterial.uniforms.directionalLightDirections.value = dirDirections;
+  //       glassMaterial.uniforms.directionalLightColors.value = dirColors;
+  //       glassMaterial.uniforms.directionalLightIntensities.value =
+  //         dirIntensities;
+  //     }
+
+  //     const currentRenderTarget = gl.getRenderTarget();
+  //     const originalBackground = scene.background;
+  //     const originalEnvironment = scene.environment;
+  //     const originalCameraLayers = camera.layers.mask;
+  //     const excludedObjects = [];
+
+  //     const glassMeshesByLayer = new Map();
+  //     scene.traverse((obj) => {
+  //       if (
+  //         obj.isMesh &&
+  //         obj.material &&
+  //         obj.material.userData &&
+  //         obj.material.userData.shellLayer !== undefined
+  //       ) {
+  //         const layer = obj.material.userData.shellLayer;
+  //         const isBack = obj.material.userData.isBackFace || false;
+  //         const key = `${layer}_${isBack ? "back" : "front"}`;
+
+  //         if (!glassMeshesByLayer.has(key)) {
+  //           glassMeshesByLayer.set(key, []);
+  //         }
+  //         glassMeshesByLayer.get(key).push(obj);
+  //       }
+
+  //       if (obj.userData.excludeFromGlass) {
+  //         excludedObjects.push(obj);
+  //         obj.visible = false;
+  //       }
+  //     });
+
+  //     const allKeys = Array.from(glassMeshesByLayer.keys());
+  //     const layers = [
+  //       ...new Set(allKeys.map((k) => parseInt(k.split("_")[0]))),
+  //     ].sort((a, b) => a - b);
+
+  //     const currentKey = `${shellLayer}_${isBackFace ? "back" : "front"}`;
+  //     if (!glassMeshesByLayer.has(currentKey)) return;
+
+  //     camera.layers.set(NORMAL_LAYER);
+  //     camera.layers.enable(TRANSMISSION_LAYER);
+
+  //     const currentLayerIndex = layers.indexOf(shellLayer);
+
+  //     const meshesToHide = [];
+
+  //     if (isBackFace) {
+  //       for (let i = 0; i <= currentLayerIndex; i++) {
+  //         const frontKey = `${layers[i]}_front`;
+  //         const backKey = `${layers[i]}_back`;
+
+  //         if (glassMeshesByLayer.has(frontKey)) {
+  //           meshesToHide.push(...glassMeshesByLayer.get(frontKey));
+  //         }
+
+  //         if (i < currentLayerIndex && glassMeshesByLayer.has(backKey)) {
+  //           meshesToHide.push(...glassMeshesByLayer.get(backKey));
+  //         }
+  //       }
+  //     } else {
+  //       for (let i = 0; i <= currentLayerIndex; i++) {
+  //         const frontKey = `${layers[i]}_front`;
+  //         const backKey = `${layers[i]}_back`;
+
+  //         if (glassMeshesByLayer.has(frontKey)) {
+  //           meshesToHide.push(...glassMeshesByLayer.get(frontKey));
+  //         }
+  //         if (glassMeshesByLayer.has(backKey)) {
+  //           meshesToHide.push(...glassMeshesByLayer.get(backKey));
+  //         }
+  //       }
+  //     }
+
+  //     meshesToHide.forEach((mesh) => {
+  //       mesh.visible = false;
+  //     });
+
+  //     gl.setRenderTarget(transmissionRenderTarget);
+  //     gl.clear();
+
+  //     gl.render(backgroundScene, camera);
+  //     gl.render(scene, camera);
+
+  //     const currentMeshes = glassMeshesByLayer.get(currentKey);
+  //     if (currentMeshes) {
+  //       currentMeshes.forEach((mesh) => {
+  //         mesh.visible = true;
+  //       });
+  //     }
+
+  //     excludedObjects.forEach((obj) => {
+  //       obj.visible = true;
+  //     });
+
+  //     glassMaterial.uniforms.transmissionSamplerMap.value =
+  //       transmissionRenderTarget.texture;
+  //     glassMaterial.uniforms.sceneDepth.value =
+  //       transmissionRenderTarget.depthTexture;
+
+  //     glassMeshesByLayer.forEach((meshes) => {
+  //       meshes.forEach((mesh) => {
+  //         mesh.visible = true;
+  //       });
+  //     });
+
+  //     camera.layers.mask = originalCameraLayers;
+  //     scene.background = originalBackground;
+  //     scene.environment = originalEnvironment;
+  //     gl.setRenderTarget(currentRenderTarget);
+  //   }
+  // });
+
+  const frameCountRef = useRef(0);
+
   useFrame((state) => {
+    frameCountRef.current++;
+    
+    // Only update transmission texture every 10 frames
+    const shouldUpdateTransmission = frameCountRef.current % 10 === 0;
+  
     if (glassMaterial && glassMaterial.uniforms) {
-      // Update camera matrices and position
+      // Update camera matrices and position (every frame for smooth rendering)
       if (glassMaterial.uniforms.viewMatrix) {
         glassMaterial.uniforms.viewMatrix.value.copy(camera.matrixWorldInverse);
       }
@@ -1171,20 +1390,19 @@ if (usePositionNormalMap) {
       if (glassMaterial.uniforms.cameraPosition) {
         glassMaterial.uniforms.cameraPosition.value.copy(camera.position);
       }
-
-      // Update light uniforms from scene
+  
+      // Update light uniforms from scene (every frame)
       if (enableLighting) {
         const pointLights = [];
         const directionalLights = [];
-
-        // Helper function to check if light should be included
+  
         const shouldIncludeLight = (light) => {
           if (!enabledLightNames || enabledLightNames.length === 0) {
-            return true; // Include all lights if no filter specified
+            return true;
           }
           return enabledLightNames.includes(light.name);
         };
-
+  
         scene.traverse((obj) => {
           if (
             obj.isPointLight &&
@@ -1200,7 +1418,7 @@ if (usePositionNormalMap) {
             directionalLights.push(obj);
           }
         });
-
+  
         // Update point lights
         const pointPositions = new Array(maxLights)
           .fill(null)
@@ -1210,20 +1428,20 @@ if (usePositionNormalMap) {
           .map(() => new THREE.Vector3());
         const pointIntensities = new Array(maxLights).fill(0);
         const pointDistances = new Array(maxLights).fill(0);
-
+  
         pointLights.forEach((light, i) => {
           pointPositions[i].copy(light.position);
           pointColors[i].set(light.color.r, light.color.g, light.color.b);
           pointIntensities[i] = light.intensity;
           pointDistances[i] = light.distance;
         });
-
+  
         glassMaterial.uniforms.numPointLights.value = pointLights.length;
         glassMaterial.uniforms.pointLightPositions.value = pointPositions;
         glassMaterial.uniforms.pointLightColors.value = pointColors;
         glassMaterial.uniforms.pointLightIntensities.value = pointIntensities;
         glassMaterial.uniforms.pointLightDistances.value = pointDistances;
-
+  
         // Update directional lights
         const dirDirections = new Array(maxLights)
           .fill(null)
@@ -1232,24 +1450,22 @@ if (usePositionNormalMap) {
           .fill(null)
           .map(() => new THREE.Vector3());
         const dirIntensities = new Array(maxLights).fill(0);
-
+  
         directionalLights.forEach((light, i) => {
           const lightWorldPos = new THREE.Vector3();
           light.getWorldPosition(lightWorldPos);
-
-          // Get the target's world position
+  
           const targetWorldPos = new THREE.Vector3();
           light.target.getWorldPosition(targetWorldPos);
-
-          // Calculate direction from light to target
+  
           dirDirections[i]
             .subVectors(targetWorldPos, lightWorldPos)
             .normalize();
-
+  
           dirColors[i].set(light.color.r, light.color.g, light.color.b);
           dirIntensities[i] = light.intensity;
         });
-
+  
         glassMaterial.uniforms.numDirectionalLights.value =
           directionalLights.length;
         glassMaterial.uniforms.directionalLightDirections.value = dirDirections;
@@ -1257,13 +1473,16 @@ if (usePositionNormalMap) {
         glassMaterial.uniforms.directionalLightIntensities.value =
           dirIntensities;
       }
-
+  
+      // Only render transmission texture every 10 frames
+      if (!shouldUpdateTransmission) return;
+  
       const currentRenderTarget = gl.getRenderTarget();
       const originalBackground = scene.background;
       const originalEnvironment = scene.environment;
       const originalCameraLayers = camera.layers.mask;
       const excludedObjects = [];
-
+  
       const glassMeshesByLayer = new Map();
       scene.traverse((obj) => {
         if (
@@ -1275,43 +1494,43 @@ if (usePositionNormalMap) {
           const layer = obj.material.userData.shellLayer;
           const isBack = obj.material.userData.isBackFace || false;
           const key = `${layer}_${isBack ? "back" : "front"}`;
-
+  
           if (!glassMeshesByLayer.has(key)) {
             glassMeshesByLayer.set(key, []);
           }
           glassMeshesByLayer.get(key).push(obj);
         }
-
+  
         if (obj.userData.excludeFromGlass) {
           excludedObjects.push(obj);
           obj.visible = false;
         }
       });
-
+  
       const allKeys = Array.from(glassMeshesByLayer.keys());
       const layers = [
         ...new Set(allKeys.map((k) => parseInt(k.split("_")[0]))),
       ].sort((a, b) => a - b);
-
+  
       const currentKey = `${shellLayer}_${isBackFace ? "back" : "front"}`;
       if (!glassMeshesByLayer.has(currentKey)) return;
-
+  
       camera.layers.set(NORMAL_LAYER);
       camera.layers.enable(TRANSMISSION_LAYER);
-
+  
       const currentLayerIndex = layers.indexOf(shellLayer);
-
+  
       const meshesToHide = [];
-
+  
       if (isBackFace) {
         for (let i = 0; i <= currentLayerIndex; i++) {
           const frontKey = `${layers[i]}_front`;
           const backKey = `${layers[i]}_back`;
-
+  
           if (glassMeshesByLayer.has(frontKey)) {
             meshesToHide.push(...glassMeshesByLayer.get(frontKey));
           }
-
+  
           if (i < currentLayerIndex && glassMeshesByLayer.has(backKey)) {
             meshesToHide.push(...glassMeshesByLayer.get(backKey));
           }
@@ -1320,7 +1539,7 @@ if (usePositionNormalMap) {
         for (let i = 0; i <= currentLayerIndex; i++) {
           const frontKey = `${layers[i]}_front`;
           const backKey = `${layers[i]}_back`;
-
+  
           if (glassMeshesByLayer.has(frontKey)) {
             meshesToHide.push(...glassMeshesByLayer.get(frontKey));
           }
@@ -1329,39 +1548,39 @@ if (usePositionNormalMap) {
           }
         }
       }
-
+  
       meshesToHide.forEach((mesh) => {
         mesh.visible = false;
       });
-
+  
       gl.setRenderTarget(transmissionRenderTarget);
       gl.clear();
-
+  
       gl.render(backgroundScene, camera);
       gl.render(scene, camera);
-
+  
       const currentMeshes = glassMeshesByLayer.get(currentKey);
       if (currentMeshes) {
         currentMeshes.forEach((mesh) => {
           mesh.visible = true;
         });
       }
-
+  
       excludedObjects.forEach((obj) => {
         obj.visible = true;
       });
-
+  
       glassMaterial.uniforms.transmissionSamplerMap.value =
         transmissionRenderTarget.texture;
       glassMaterial.uniforms.sceneDepth.value =
         transmissionRenderTarget.depthTexture;
-
+  
       glassMeshesByLayer.forEach((meshes) => {
         meshes.forEach((mesh) => {
           mesh.visible = true;
         });
       });
-
+  
       camera.layers.mask = originalCameraLayers;
       scene.background = originalBackground;
       scene.environment = originalEnvironment;
