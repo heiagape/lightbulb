@@ -726,9 +726,9 @@ function Branch() {
                   //   transparent={false}
                   //   opacity={1.0}
                   //   transmission={1.0}
-                  //   ior={2.7}
+                  //   ior={2.3}
                   //   // Make depth visible: larger thickness + attenuation tint
-                  //   thickness={0.1}
+                  //   thickness={0.5}
                   //   attenuationDistance={.2}
                   //   attenuationColor={"#e4f3ff"}
                   //   dispersion={1.0}
@@ -737,29 +737,29 @@ function Branch() {
                   // />
                 )}
                 {isTransparentMesh && (
-                  <ThinMiracleGlass
-                    ior={1.5}
-                    absorptionColor={"#ffffff"}
-                    isBackFace={false}
-                    thickness={0.001}
-                    envIntensity={1.5}
-                    edgeReflectionIntensity={0.5}
-                    edgeReflectionPower={0.9}
-                    edgeReflectionWidth={0.1}
-                    shellLayer={2}
-                    emissive="#FAF9D0"
-                    emissiveIntensity={0.2}
-                  />
-                  // <meshStandardMaterial
-                  // color={"#ffffff"}
-                  // opacity={0.05}
-                  // transparent={true}
+                  // <ThinMiracleGlass
+                  //   ior={1.5}
+                  //   absorptionColor={"#ffffff"}
+                  //   isBackFace={false}
+                  //   thickness={0.001}
+                  //   envIntensity={1.5}
+                  //   edgeReflectionIntensity={0.5}
+                  //   edgeReflectionPower={0.9}
+                  //   edgeReflectionWidth={0.1}
+                  //   shellLayer={2}
+                  //   emissive="#FAF9D0"
+                  //   emissiveIntensity={0.2}
                   // />
+                  <meshStandardMaterial
+                  color={"#ffffff"}
+                  opacity={0.05}
+                  transparent={true}
+                  />
                 )}
               </instancedMesh>
 
               {/* Second layer - duplicate glass mesh with different material */}
-              {isMiracleGlassMesh && (
+              {/* {isMiracleGlassMesh && (
                 <instancedMesh
                   key={`branch-${branchIndex}-mesh-${meshIndex}-layer2-${totalInstances}-${config.randomSeed}`}
                   ref={(ref) => {
@@ -784,7 +784,7 @@ function Branch() {
                     roughness={0.1}
                   />
                 </instancedMesh>
-              )}
+              )} */}
             </>
           );
         });

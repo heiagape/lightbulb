@@ -73,7 +73,7 @@ function Scene() {
         distance={10}
       />
 
-      {/* Top-left reflection light - invisible but provides reflection basis */}
+  
       <directionalLight
         position={[-8, 10, 3]}
         intensity={2.0}
