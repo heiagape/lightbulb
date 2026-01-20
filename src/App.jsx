@@ -94,6 +94,7 @@ function Scene() {
         maxDistance={4}
         maxPolarAngle={Math.PI / 2}
         minPolarAngle={Math.PI / 4}
+        enablePan={false}
       />
 
       {/* Post Processing - Always render composer to prevent accumulation issues */}
