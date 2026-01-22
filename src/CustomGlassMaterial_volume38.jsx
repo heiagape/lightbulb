@@ -1246,7 +1246,7 @@ void main() {
     updateSceneCache();
 
     // Only update transmission texture every 5 frames
-    const shouldUpdateTransmission = frameCountRef.current % 1 === 0;
+    const shouldUpdateTransmission = frameCountRef.current % 0 === 0;
 
     if (glassMaterial && glassMaterial.uniforms) {
       // Update camera matrices and position (every frame for smooth rendering)

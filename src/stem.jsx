@@ -3,6 +3,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { useMaterialType } from "./materialState";
+import { useMesh363Scale } from "./scaleState";
 import { useControls } from "leva";
 
 // Hook to load the Stem.glb model
@@ -15,6 +16,7 @@ export function useStem() {
 export function Stem() {
   const gltf = useStem();
   const materialTypeValue = useMaterialType();
+  const mesh363Scale = useMesh363Scale();
 
   // Material color control (shared with Branch component via Leva panel)
   const materialControls = useControls("Material", {
@@ -61,7 +63,7 @@ export function Stem() {
     }
     metalMaterial.needsUpdate = true;
 
-    // Ensure blackMaterial always stays black (safety check)
+    // Ensure blackMaterial always stays black (safety check) 
     if (blackMaterial.color.getHex() !== 0x000000) {
       blackMaterial.color.set(0x000000);
       blackMaterial.needsUpdate = true;
@@ -104,6 +106,11 @@ export function Stem() {
           // All other non-glass meshes get metal material (gold/platinum)
           child.material = metalMaterial;
         }
+
+        // Apply scale to mesh 363 (controlled from Branch.jsx GUI)
+        if (is17363) {
+          child.scale.set(mesh363Scale, mesh363Scale, mesh363Scale);
+        }
       }
     });
   }, [
@@ -112,6 +119,7 @@ export function Stem() {
     metalMaterial,
     materialTypeValue,
     materialControls.goldColor,
+    mesh363Scale,
   ]);
 
   return <primitive object={gltf.scene} />;
