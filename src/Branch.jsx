@@ -739,7 +739,7 @@ function Branch() {
                     transparent={false}
                     opacity={1.0}
                     transmission={1.0}
-                    ior={2.3}
+                    ior={2.33}
                     // Make depth visible: larger thickness + attenuation tint
                     thickness={0.5}
                     attenuationDistance={.2}
