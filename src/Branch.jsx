@@ -5,7 +5,6 @@ import { useControls, button } from "leva";
 import * as THREE from "three";
 import { MiracleGlass, ThinMiracleGlass } from "./GlassMaterials";
 import { useMaterialType, setGlobalMaterialType } from "./materialState";
-import { setGlobalMesh363Scale } from "./scaleState";
 
 // Branch component - creates instanced meshes from multiple branch models
 function Branch() {
@@ -52,7 +51,7 @@ function Branch() {
     distanceOut: {
       value: 0.07,
       min: -0.05,
-      max: 1.07,
+      max: 0.07,
       step: 0.001,
       label: "Distance Out",
     },
@@ -72,18 +71,6 @@ function Branch() {
     goldColor: {
       value: "#ad8934",
       label: "Gold Color",
-    },
-  });
-
-  // Mesh 363 scale control (affects stem.jsx)
-  const mesh363Controls = useControls("Mesh 363 Scale (Stem)", {
-    mesh363Scale: {
-      value: 1.0,
-      min: 0.1,
-      max: 3.0,
-      step: 0.1,
-      label: "Scale",
-      onChange: (value) => setGlobalMesh363Scale(value),
     },
   });
 
@@ -323,10 +310,10 @@ function Branch() {
               : "none",
           };
 
-          console.log(
-            `Branch ${branchIndex + 1}: Mesh "${child.name}"`,
-            materialInfo
-          );
+          // console.log(
+          //   `Branch ${branchIndex + 1}: Mesh "${child.name}"`,
+          //   materialInfo
+          // );
         }
       });
       return meshes;
@@ -688,8 +675,6 @@ function Branch() {
             console.log(
               `Applying standardGlassMaterial to mesh: "${meshData.name}"`
             );
-          } else if (isBlackMaterialMesh && !is17659) {
-            materialToUse = blackMaterial; // Meshes with 17363, 17662, 17467, 17468, 17364, 17838, 17839, or 17762 (NOT "17659") get black material
           } else if (!isGlassMesh) {
             materialToUse = goldMetalMaterial; // Non-glass meshes get gold/platinum material
           } else if (isTransparentMesh) {
@@ -697,6 +682,8 @@ function Branch() {
             materialToUse = null;
           } else if (isMiracleGlassMesh) {
             materialToUse = null; // Glass meshes (except glass02/glass06/transparent) use MiracleGlass material
+          } else if (isBlackMaterialMesh && !is17659) {
+            materialToUse = blackMaterial; // Meshes with 17363, 17662, 17467, 17468, 17364, 17838, 17839, or 17762 (NOT "17659") get black material
           } else {
             // All other non-glass, non-black-material meshes get gold/platinum material
             materialToUse = goldMetalMaterial;
@@ -715,39 +702,39 @@ function Branch() {
                 args={[meshData.geometry, materialToUse, count]}
               >
                 {isMiracleGlassMesh && (
-                  // <MiracleGlass
-                  //   ior={1.5}
-                  //   absorptionColor={"#ffffff"}
-                  //   isBackFace={false}
-                  //   thickness={0.01}
-                  //   envIntensity={1.5}
-                  //   edgeReflectionIntensity={0.5}
-                  //   edgeReflectionPower={0.9}
-                  //   edgeReflectionWidth={0.1}
-                  //   shellLayer={2}
-                  //   emissive="#FAF9D0"
-                  //   emissiveIntensity={0.2}
-                  // />
+                  <MiracleGlass
+                    ior={1.5}
+                    absorptionColor={"#ffffff"}
+                    isBackFace={false}
+                    thickness={0.01}
+                    envIntensity={1.5}
+                    edgeReflectionIntensity={0.5}
+                    edgeReflectionPower={0.9}
+                    edgeReflectionWidth={0.1}
+                    shellLayer={2}
+                    emissive="#FAF9D0"
+                    emissiveIntensity={0.2}
+                  />
                   // <meshStandardMaterial
                   // color={"#ffffff"}
                   // opacity={0.05}
                   // transparent={true}
                   // />
-                  <meshPhysicalMaterial
-                    color={"#ffffff"}
-                    // Transmission glass: keep opacity at 1 and drive the look via transmission/attenuation
-                    transparent={false}
-                    opacity={1.0}
-                    transmission={1.0}
-                    ior={2.33}
-                    // Make depth visible: larger thickness + attenuation tint
-                    thickness={0.5}
-                    attenuationDistance={.2}
-                    attenuationColor={"#e4f3ff"}
-                    dispersion={1.0}
-                    roughness={.02}
-                    side={THREE.DoubleSide}
-                  />
+                  // <meshPhysicalMaterial
+                  //   color={"#ffffff"}
+                  //   // Transmission glass: keep opacity at 1 and drive the look via transmission/attenuation
+                  //   transparent={false}
+                  //   opacity={1.0}
+                  //   transmission={1.0}
+                  //   ior={2.33}
+                  //   // Make depth visible: larger thickness + attenuation tint
+                  //   thickness={0.5}
+                  //   attenuationDistance={.2}
+                  //   attenuationColor={"#e4f3ff"}
+                  //   dispersion={1.0}
+                  //   roughness={.02}
+                  //   side={THREE.DoubleSide}
+                  // />
                 )}
                 {isTransparentMesh && (
                   // <ThinMiracleGlass

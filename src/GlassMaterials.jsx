@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useLoader, useThree } from "@react-three/fiber";
 import { RGBELoader } from "three-stdlib";
 import * as THREE from "three";
-import CustomGlassMaterial from "./CustomGlassMaterial_volume38";
+import CustomGlassMaterial from "./CustomGlassMaterial_volume39";
 
 // Miracle specific glass configuration
 const miracleGlassConfig = {
